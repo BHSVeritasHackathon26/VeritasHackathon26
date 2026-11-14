@@ -73,6 +73,21 @@ baseline, trained for 120,000 batches.
     the longest sentences) need checking too.
 - TODO, add more as they happen.
 
+### Questions we asked ourselves along the way
+Notes to ourselves; not answered yet. Each one should end up as a short answer, and
+where marked, a graph.
+
+1. **What kind of data is this?** What does the data look like? What is its shape?
+2. **Number of sentences trained on vs performance.** What exactly do we mean by
+   "performance"? Once we have that data, create a graph with number of sentences on
+   the x axis and performance on the y axis.
+3. **What parameters are being used in training?** For example: token size vs k-mer,
+   which loss function we are using, the number of sentences used in training.
+   Create a graph.
+4. **Sentence length vs performance.** Create a graph.
+5. **Do nonsensical sentences vs sentences with proper grammar make a difference?**
+   Create a graph.
+
 ### Hardware
 - Training: Linux desktop, GeForce RTX 2080 Ti (11 GB), 64 GB RAM.
 - Development and testing of code: MacBook (Apple M5, 16 GB RAM).
