@@ -165,7 +165,8 @@ if __name__ == "__main__":
 
     from google import genai
     print(f"Asking {model} ...")
-    interaction = genai.Client().interactions.create(
+    client = genai.Client()  # keep it in a variable so it stays open during the request
+    interaction = client.interactions.create(
         model=model, input=prompt,
         response_format={"type": "text", "mime_type": "application/json",
                          "schema": RESPONSE_SCHEMA},
