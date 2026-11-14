@@ -1,0 +1,36 @@
+# Everything that is specific to one participant lives in this file.
+# To retrain for a different person, copy this file and change the values.
+# Nothing in the Python code should mention T15 or the number 512 directly.
+
+participant = "t15"
+
+# Folder holding one sub-folder per recording session (path is relative to the repo).
+data_dir = "hdf5_data_final"
+
+# Where the frozen split list is saved (made by `python -m b2t.splits`).
+splits_file = "splits/t15.json"
+
+# Recording setup: 256 electrodes x 2 features each, one row every 20 ms.
+n_features = 512
+bin_ms = 20
+
+# Share of each session's training trials set aside for tuning / early stopping.
+tune_fraction = 0.1
+seed = 0
+
+# Sessions the shared network never sees in "Run B". They stand in for a new
+# user/day in the calibration experiment (all six 2025 sessions).
+holdout_sessions = [
+    "t15.2025.01.10",
+    "t15.2025.01.12",
+    "t15.2025.03.14",
+    "t15.2025.03.16",
+    "t15.2025.03.30",
+    "t15.2025.04.13",
+]
+
+# File inside each session folder for each official split.
+[files]
+train = "data_train.hdf5"
+val = "data_val.hdf5"
+test = "data_test.hdf5"

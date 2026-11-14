@@ -1,2 +1,6 @@
 hdf5_data_final/
 .DS_Store
+__pycache__/
+.venv/
+venv/
+runs/
