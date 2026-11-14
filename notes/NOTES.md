@@ -61,6 +61,21 @@ errors on purpose, and decoded with the CMU dictionary (`python -m b2t.decode_ch
   words are likely. This is the motivation for adding a language model.
 - Random damage is not how a real model errs, so these numbers are a guide only.
 
+### Linear baseline, end to end (Sat evening)
+`python -m b2t.evaluate --run runs/linear --split tune --limit 20 --llm`, on a random
+20 tune sentences. A very small sample, so these are rough.
+
+| Stage | Error rate |
+|---|---|
+| Phoneme error rate (model alone) | 63.8% |
+| Word error rate, dictionary decoder | 91.6% |
+| Word error rate, language-model decoder (Gemini) | 84.0% |
+
+- With about 6 in 10 phonemes wrong, almost no words survive: the decoders cannot
+  rescue a model this weak. The language model helped a little (91.6% -> 84.0%).
+- This is the end-to-end number for our simple baseline. TODO: rerun on all 808 tune
+  sentences so it is comparable with Run A.
+
 Reference point: the dataset authors report 10.1% phoneme error rate on val for their
 baseline, trained for 120,000 batches.
 
@@ -95,6 +110,32 @@ baseline, trained for 120,000 batches.
     measured whether batches of 32 change the final score.
   - Lesson: a short test run only proves the typical case works. Rare inputs (here,
     the longest sentences) need checking too.
+- **Gemini decoder returned nothing on real batches (Sat evening).**
+  - What we tried: sending 20 sentences per request to Gemini (`gemini-4-hydrogen`,
+    free tier) with the linear baseline's predicted phonemes and the dictionary's
+    candidate words, asking for JSON back.
+  - What happened, in order:
+    1. `request failed (JSONDecodeError: Expecting value: line 1 column 1 (char 0))`.
+       The reply was not valid JSON, but the error did not show what the reply was.
+    2. We added a small connection test (`python -m b2t.llm_decode`). Its first
+       version failed with "Cannot send a request, as the client has been closed".
+       That was a bug in the test itself: the Gemini client was created and used in
+       one line without being stored, so Python closed it before the request went out.
+    3. With the test fixed, a two-sentence request worked (status "completed",
+       both sentences decoded correctly). So the key, model name and format were fine.
+    4. The real 20-sentence batch then failed with
+       `the model returned no text (status='incomplete', errors=None)`.
+  - Why we think it happened: the model "thinks" before answering and that thinking
+    uses up its output allowance. A long batch of badly garbled phonemes used the
+    whole allowance before any answer was written. Small requests finished; large
+    ones did not. (Inferred from the status; we did not inspect token usage.)
+  - What we changed: asked for the "low" thinking level, raised the output allowance
+    to 16,000 tokens, and cut batches from 20 to 10 sentences. After that, 20
+    sentences decoded with 0 falling back to the dictionary.
+  - Open question: "low" thinking may cost some accuracy. Comparing "low" with
+    "medium" on the same sentences would be a cheap experiment.
+  - Lessons: make error messages show what actually came back; test with realistic
+    input sizes, not just a tiny example.
 - TODO, add more as they happen.
 
 ### Questions we asked ourselves along the way
@@ -121,7 +162,9 @@ where marked, a graph.
 - Paper: Card et al., "An Accurate and Rapidly Calibrating Speech Neuroprosthesis" (2024), New England Journal of Medicine
 - Reference code and settings: https://github.com/Neuroprosthetics-Lab/nejm-brain-to-text
 - Dataset archive: https://datadryad.org/dataset/doi:10.5061/dryad.dncjsxm85
-- Libraries: PyTorch, NumPy, h5py
+- Pronunciations: CMU Pronouncing Dictionary, http://www.speech.cs.cmu.edu/cgi-bin/cmudict (via the `cmudict` Python package)
+- Language model for decoding: Google Gemini API (`gemini-4-hydrogen`, free tier), https://aistudio.google.com
+- Libraries: PyTorch, NumPy, h5py, cmudict, google-genai
 
 ## AI tools used
 - Claude Code (Claude Fable 5.2, Anthropic): project planning, explanations, and writing
