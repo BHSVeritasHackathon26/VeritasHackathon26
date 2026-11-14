@@ -13,6 +13,7 @@ told when each phoneme happened.
 
 import argparse
 import json
+import math
 import random
 import shutil
 import time
@@ -21,12 +22,29 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
+from b2t.augment import augment
 from b2t.batching import make_batch
 from b2t.config import load_config
 from b2t.data import load_splits, load_trials
 from b2t.metrics import phoneme_error_rate
 from b2t.models import MODELS, build_model
 from b2t.phonemes import BLANK_ID, N_CLASSES, PHONEMES
+
+
+# Training settings per model, used unless overridden on the command line.
+# The GRU values follow the Brain-to-Text '25 baseline.
+DEFAULTS = {
+    "linear": dict(lr=1e-3, eps=1e-8, weight_decay=0.01, cosine=False, augment=False),
+    "gru": dict(lr=5e-3, eps=0.1, weight_decay=1e-3, cosine=True, augment=True),
+}
+
+
+def learning_rate_scale(step, total, warmup=1000, floor=0.02):
+    """Ramp up for the first steps, then glide down along a cosine curve."""
+    if step < warmup:
+        return step / warmup
+    progress = (step - warmup) / max(1, total - warmup)
+    return floor + (1 - floor) * 0.5 * (1 + math.cos(math.pi * progress))
 
 
 def greedy_decode(logits, out_lengths):
@@ -63,7 +81,9 @@ def main():
     p.add_argument("--out", required=True, help="folder for the output bundle")
     p.add_argument("--batches", type=int, default=3000)
     p.add_argument("--batch-size", type=int, default=64)
-    p.add_argument("--lr", type=float, default=1e-3)
+    p.add_argument("--lr", type=float, default=None)
+    p.add_argument("--units", type=int, default=768, help="GRU size (gru only)")
+    p.add_argument("--layers", type=int, default=5, help="GRU depth (gru only)")
     p.add_argument("--eval-every", type=int, default=500)
     p.add_argument("--log-every", type=int, default=100)
     p.add_argument("--seed", type=int, default=0)
@@ -72,6 +92,9 @@ def main():
     p.add_argument("--limit-sessions", type=int, default=None,
                    help="only use the first N sessions (quick tests on a laptop)")
     args = p.parse_args()
+    settings = dict(DEFAULTS[args.model])
+    if args.lr is not None:
+        settings["lr"] = args.lr
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -93,11 +116,22 @@ def main():
 
     # Sessions are numbered by their place in the full list, so a model always has
     # one slot per session even when some are left out of this run.
-    model = build_model(args.model, cfg.n_features, len(splits["sessions"]), N_CLASSES)
+    model_kwargs = {"units": args.units, "layers": args.layers} if args.model == "gru" else {}
+    model = build_model(args.model, cfg.n_features, len(splits["sessions"]), N_CLASSES,
+                        **model_kwargs)
     model.to(device)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"Model '{args.model}' with {n_params:,} parameters on {device}")
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=settings["lr"],
+                                  eps=settings["eps"], weight_decay=settings["weight_decay"])
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optimizer,
+        (lambda s: learning_rate_scale(s, args.batches)) if settings["cosine"] else (lambda s: 1.0),
+    )
+    # Mixed precision: do most of the maths in 16-bit on the GPU, which is faster
+    # and uses less memory. The loss itself is still computed in 32-bit.
+    use_amp = device == "cuda"
+    scaler = torch.amp.GradScaler(enabled=use_amp)
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -107,16 +141,23 @@ def main():
     t0 = time.time()
     for step in range(1, args.batches + 1):
         batch = make_batch(random.sample(train, args.batch_size), device)
-        logits, out_lengths = model(batch["x"], batch["lengths"], batch["session_idx"])
+        x, lengths = batch["x"], batch["lengths"]
+        if settings["augment"]:
+            x, lengths = augment(x, lengths)
+        with torch.autocast(device_type=device, enabled=use_amp):
+            logits, out_lengths = model(x, lengths, batch["session_idx"])
         loss = F.ctc_loss(
-            logits.log_softmax(-1).transpose(0, 1),  # CTC wants (time, batch, classes)
+            logits.float().log_softmax(-1).transpose(0, 1),  # (time, batch, classes)
             batch["labels"], out_lengths, batch["label_lengths"],
             blank=BLANK_ID, zero_infinity=True,
         )
         optimizer.zero_grad()
-        loss.backward()
+        scaler.scale(loss).backward()
+        scaler.unscale_(optimizer)
         torch.nn.utils.clip_grad_norm_(model.parameters(), 10.0)
-        optimizer.step()
+        scaler.step(optimizer)
+        scaler.update()
+        scheduler.step()
         losses.append(loss.item())
 
         if step % args.log_every == 0:
@@ -144,6 +185,8 @@ def main():
             "phonemes": PHONEMES,
             "all_sessions": splits["sessions"],
             "trained_on_sessions": sessions,
+            "model_kwargs": model_kwargs,
+            "settings": settings,
             "args": vars(args),
             "n_parameters": n_params,
             "best_tune_per": best_per,
