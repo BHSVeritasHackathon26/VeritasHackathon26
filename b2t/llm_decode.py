@@ -82,7 +82,29 @@ def ask_gemini(prompt, model=DEFAULT_MODEL):
             "schema": RESPONSE_SCHEMA,
         },
     )
-    return json.loads(interaction.output_text)["sentences"]
+    return parse_reply(interaction)
+
+
+def parse_reply(interaction):
+    """Pull the list of sentences out of the model's reply.
+
+    If the reply is empty or not valid JSON, raise an error that says what came
+    back, so the problem can be diagnosed from the terminal.
+    """
+    text = (getattr(interaction, "output_text", None) or "").strip()
+    details = (f"status={getattr(interaction, 'status', None)!r}, "
+               f"errors={getattr(interaction, 'errors', None)!r}")
+    if not text:
+        raise RuntimeError(f"the model returned no text ({details})")
+    # Some models wrap JSON in ```json ... ``` or add words around it; keep the
+    # part from the first "{" to the last "}".
+    start, end = text.find("{"), text.rfind("}")
+    if start == -1 or end == -1:
+        raise RuntimeError(f"no JSON in the reply ({details}): {text[:300]!r}")
+    try:
+        return json.loads(text[start : end + 1])["sentences"]
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        raise RuntimeError(f"could not read the reply ({error}; {details}): {text[:300]!r}")
 
 
 def ask_with_cache(prompt, model, ask, retries=4):
@@ -125,3 +147,31 @@ def llm_decode(decoder, all_ids, model=DEFAULT_MODEL, batch_size=20, pause=4.0,
         if not was_cached:
             time.sleep(pause)  # stay under the requests-per-minute limit
     return results, fallbacks
+
+
+if __name__ == "__main__":
+    # Quick connection test: python -m b2t.llm_decode [model name]
+    # Sends two short made-up sentences and shows exactly what comes back.
+    import sys
+
+    from b2t.decode import DictionaryDecoder
+    from b2t.phonemes import PHONEMES
+
+    model = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_MODEL
+    to_ids = lambda text: [PHONEMES.index(p) for p in text.split()]
+    examples = [to_ids("AY | N OW | DH IH S | IH Z | AH | L AA T |"),
+                to_ids("DH EY | AA R | V EH R IY | K AY N D | T UW | M IY |")]
+    prompt = build_prompt(DictionaryDecoder(), examples)
+
+    from google import genai
+    print(f"Asking {model} ...")
+    interaction = genai.Client().interactions.create(
+        model=model, input=prompt,
+        response_format={"type": "text", "mime_type": "application/json",
+                         "schema": RESPONSE_SCHEMA},
+    )
+    print(f"status:      {interaction.status!r}")
+    print(f"errors:      {interaction.errors!r}")
+    print(f"usage:       {interaction.usage!r}")
+    print(f"output_text: {interaction.output_text!r}")
+    print(f"parsed:      {parse_reply(interaction)}")
