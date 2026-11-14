@@ -49,6 +49,7 @@ baseline, trained for 120,000 batches.
   and 41 phoneme classes are far easier to learn than a whole vocabulary.
 - Model design follows the dataset authors' baseline (per-session input layer + GRU +
   CTC loss). We wrote our own implementation.
+    > For more information on CTC loss, see CTCLossFunction.md
 - Everything specific to the participant is in `configs/t15.toml`, so the same code
   can be retrained on another person's data.
 - Skipped the authors' n-gram language models: they need about 60 GB to 300 GB of RAM.
