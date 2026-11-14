@@ -68,21 +68,32 @@ def build_prompt(decoder, batch_of_ids, k=5):
     return "\n\n".join(parts)
 
 
-def ask_gemini(prompt, model=DEFAULT_MODEL):
-    """Send one prompt to Gemini and return its list of sentences."""
+# The model "thinks" before answering, and that thinking uses up its output budget.
+# With long prompts it was running out before writing any answer (status
+# "incomplete"), so we ask for less thinking and allow a larger budget.
+GENERATION_CONFIG = {"thinking_level": "low", "max_output_tokens": 16000}
+
+
+def send(prompt, model):
+    """Send one prompt to Gemini and return the raw reply object."""
     from google import genai  # imported here so the rest of the project works without it
 
     client = genai.Client()  # reads GEMINI_API_KEY from the environment
-    interaction = client.interactions.create(
+    return client.interactions.create(
         model=model,
         input=prompt,
+        generation_config=GENERATION_CONFIG,
         response_format={
             "type": "text",
             "mime_type": "application/json",
             "schema": RESPONSE_SCHEMA,
         },
     )
-    return parse_reply(interaction)
+
+
+def ask_gemini(prompt, model=DEFAULT_MODEL):
+    """Send one prompt to Gemini and return its list of sentences."""
+    return parse_reply(send(prompt, model))
 
 
 def parse_reply(interaction):
@@ -93,7 +104,8 @@ def parse_reply(interaction):
     """
     text = (getattr(interaction, "output_text", None) or "").strip()
     details = (f"status={getattr(interaction, 'status', None)!r}, "
-               f"errors={getattr(interaction, 'errors', None)!r}")
+               f"errors={getattr(interaction, 'errors', None)!r}, "
+               f"usage={getattr(interaction, 'usage', None)!r}")
     if not text:
         raise RuntimeError(f"the model returned no text ({details})")
     # Some models wrap JSON in ```json ... ``` or add words around it; keep the
@@ -127,7 +139,7 @@ def ask_with_cache(prompt, model, ask, retries=4):
     return None, False
 
 
-def llm_decode(decoder, all_ids, model=DEFAULT_MODEL, batch_size=20, pause=4.0,
+def llm_decode(decoder, all_ids, model=DEFAULT_MODEL, batch_size=10, pause=4.0,
                ask=ask_gemini):
     """Decode many sentences. Returns (sentences, number that fell back).
 
@@ -163,14 +175,8 @@ if __name__ == "__main__":
                 to_ids("DH EY | AA R | V EH R IY | K AY N D | T UW | M IY |")]
     prompt = build_prompt(DictionaryDecoder(), examples)
 
-    from google import genai
     print(f"Asking {model} ...")
-    client = genai.Client()  # keep it in a variable so it stays open during the request
-    interaction = client.interactions.create(
-        model=model, input=prompt,
-        response_format={"type": "text", "mime_type": "application/json",
-                         "schema": RESPONSE_SCHEMA},
-    )
+    interaction = send(prompt, model)
     print(f"status:      {interaction.status!r}")
     print(f"errors:      {interaction.errors!r}")
     print(f"usage:       {interaction.usage!r}")
