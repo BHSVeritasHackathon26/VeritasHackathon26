@@ -39,8 +39,31 @@ go at the bottom. This feeds the write-up (results, what didn't work, sources).
 | run_b | same GRU | 39 (2025 held out) | 40,000 | TODO | for the calibration experiment |
 | run_a_long | same GRU | all 45 | 120,000 | TODO | the reference recipe's full length |
 
+Run A progress on tune (batch size 32): 36.2% at batch 4,000, 23.1% at 8,000,
+13.2% at 24,000. About 6.0 batches/s.
+
+### Dictionary decoder, tested on damaged true phonemes (Sat afternoon)
+Not a model result: we took the true phonemes of 300 tune sentences, added random
+errors on purpose, and decoded with the CMU dictionary (`python -m b2t.decode_check`).
+
+| Phoneme errors added | Actual phoneme error rate | Word error rate |
+|---|---|---|
+| 0% | 0.0% | 1.7% |
+| 5% | 5.1% | 12.4% |
+| 10% | 9.2% | 19.9% |
+| 20% | 19.5% | 38.6% |
+
+- Word error is roughly double the phoneme error: one wrong phoneme can ruin a whole word.
+- Even perfect phonemes give 1.7% word error, from words that sound the same
+  ("to"/"too"/"two"). All 1,899 words in these sentences are in the dictionary.
+- Typical failure: an exact match to a rare word beats a near match to a common one
+  ("D OW" became "dau" when the truth was "know"). The decoder has no sense of which
+  words are likely. This is the motivation for adding a language model.
+- Random damage is not how a real model errs, so these numbers are a guide only.
+
 Reference point: the dataset authors report 10.1% phoneme error rate on val for their
 baseline, trained for 120,000 batches.
+
 
 ### Decisions and why
 - Kept the dataset's official train/val split instead of re-splitting 80/20, so our
