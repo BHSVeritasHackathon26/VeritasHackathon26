@@ -1,0 +1,429 @@
+{
+ "run": "runs/drift",
+ "trained_on_sessions": [
+  "t15.2023.08.11",
+  "t15.2023.08.13",
+  "t15.2023.08.18",
+  "t15.2023.08.20",
+  "t15.2023.08.25",
+  "t15.2023.08.27",
+  "t15.2023.09.01",
+  "t15.2023.09.03",
+  "t15.2023.09.24",
+  "t15.2023.09.29",
+  "t15.2023.10.01",
+  "t15.2023.10.06",
+  "t15.2023.10.08",
+  "t15.2023.10.13",
+  "t15.2023.10.15",
+  "t15.2023.10.20",
+  "t15.2023.10.22",
+  "t15.2023.11.03",
+  "t15.2023.11.04",
+  "t15.2023.11.17",
+  "t15.2023.11.19",
+  "t15.2023.11.26",
+  "t15.2023.12.03",
+  "t15.2023.12.08",
+  "t15.2023.12.10",
+  "t15.2023.12.17",
+  "t15.2023.12.29"
+ ],
+ "last_training_session": "t15.2023.12.29",
+ "settings": {
+  "steps": 200,
+  "batch_size": 16,
+  "lr": 0.001,
+  "seed": 0,
+  "sizes": [
+   0,
+   10,
+   50
+  ]
+ },
+ "summary": [
+  {
+   "n_sentences": 0,
+   "n_sessions": 15,
+   "n_val_trials": 508,
+   "phoneme_error_rate": 0.6328218018256383,
+   "word_error_rate_dictionary": 0.8999428244711264
+  },
+  {
+   "n_sentences": 10,
+   "n_sessions": 15,
+   "n_val_trials": 508,
+   "phoneme_error_rate": 0.46322264849847866,
+   "word_error_rate_dictionary": 0.7104059462550029
+  },
+  {
+   "n_sentences": 50,
+   "n_sessions": 15,
+   "n_val_trials": 508,
+   "phoneme_error_rate": 0.3137319751289853,
+   "word_error_rate_dictionary": 0.5205831903945112
+  }
+ ],
+ "per_session": [
+  {
+   "session": "t15.2024.02.25",
+   "days_since_training": 58,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.3356741573033708,
+   "word_error_rate_dictionary": 0.5365853658536586,
+   "n_val_trials": 23
+  },
+  {
+   "session": "t15.2024.02.25",
+   "days_since_training": 58,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.24578651685393257,
+   "word_error_rate_dictionary": 0.45121951219512196,
+   "n_val_trials": 23
+  },
+  {
+   "session": "t15.2024.02.25",
+   "days_since_training": 58,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.17837078651685392,
+   "word_error_rate_dictionary": 0.3475609756097561,
+   "n_val_trials": 23
+  },
+  {
+   "session": "t15.2024.03.08",
+   "days_since_training": 70,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.5704125177809388,
+   "word_error_rate_dictionary": 0.8881987577639752,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2024.03.08",
+   "days_since_training": 70,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.4566145092460882,
+   "word_error_rate_dictionary": 0.7329192546583851,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2024.03.08",
+   "days_since_training": 70,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.34992887624466573,
+   "word_error_rate_dictionary": 0.577639751552795,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2024.03.15",
+   "days_since_training": 77,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.5228267667292058,
+   "word_error_rate_dictionary": 0.8038674033149171,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.03.15",
+   "days_since_training": 77,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.3964978111319575,
+   "word_error_rate_dictionary": 0.6187845303867403,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.03.15",
+   "days_since_training": 77,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.33520950594121324,
+   "word_error_rate_dictionary": 0.5303867403314917,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.03.17",
+   "days_since_training": 79,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.49511854951185497,
+   "word_error_rate_dictionary": 0.7857142857142857,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.03.17",
+   "days_since_training": 79,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.3528591352859135,
+   "word_error_rate_dictionary": 0.5952380952380952,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.03.17",
+   "days_since_training": 79,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.2608089260808926,
+   "word_error_rate_dictionary": 0.44047619047619047,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.05.10",
+   "days_since_training": 133,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.5958395245170877,
+   "word_error_rate_dictionary": 0.8910256410256411,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2024.05.10",
+   "days_since_training": 133,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.40416047548291234,
+   "word_error_rate_dictionary": 0.6666666666666666,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2024.05.10",
+   "days_since_training": 133,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.24665676077265974,
+   "word_error_rate_dictionary": 0.40384615384615385,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2024.06.14",
+   "days_since_training": 168,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.6482649842271293,
+   "word_error_rate_dictionary": 0.9403973509933775,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2024.06.14",
+   "days_since_training": 168,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.4116719242902208,
+   "word_error_rate_dictionary": 0.6225165562913907,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2024.06.14",
+   "days_since_training": 168,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.2539432176656151,
+   "word_error_rate_dictionary": 0.4370860927152318,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2024.07.19",
+   "days_since_training": 203,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.7336849044166117,
+   "word_error_rate_dictionary": 0.9857142857142858,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.07.19",
+   "days_since_training": 203,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.5603164139749506,
+   "word_error_rate_dictionary": 0.8371428571428572,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.07.19",
+   "days_since_training": 203,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.3684904416611734,
+   "word_error_rate_dictionary": 0.5971428571428572,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.07.21",
+   "days_since_training": 205,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.6248275862068966,
+   "word_error_rate_dictionary": 0.9101449275362319,
+   "n_val_trials": 46
+  },
+  {
+   "session": "t15.2024.07.21",
+   "days_since_training": 205,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.3082758620689655,
+   "word_error_rate_dictionary": 0.4956521739130435,
+   "n_val_trials": 46
+  },
+  {
+   "session": "t15.2024.07.21",
+   "days_since_training": 205,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.17103448275862068,
+   "word_error_rate_dictionary": 0.3101449275362319,
+   "n_val_trials": 46
+  },
+  {
+   "session": "t15.2024.07.28",
+   "days_since_training": 212,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.6301470588235294,
+   "word_error_rate_dictionary": 0.898360655737705,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.07.28",
+   "days_since_training": 212,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.3830882352941177,
+   "word_error_rate_dictionary": 0.5967213114754099,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2024.07.28",
+   "days_since_training": 212,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.23602941176470588,
+   "word_error_rate_dictionary": 0.4,
+   "n_val_trials": 48
+  },
+  {
+   "session": "t15.2025.01.10",
+   "days_since_training": 378,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.7589531680440771,
+   "word_error_rate_dictionary": 0.9884393063583815,
+   "n_val_trials": 23
+  },
+  {
+   "session": "t15.2025.01.10",
+   "days_since_training": 378,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.6446280991735537,
+   "word_error_rate_dictionary": 0.9421965317919075,
+   "n_val_trials": 23
+  },
+  {
+   "session": "t15.2025.01.10",
+   "days_since_training": 378,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.4490358126721763,
+   "word_error_rate_dictionary": 0.6994219653179191,
+   "n_val_trials": 23
+  },
+  {
+   "session": "t15.2025.01.12",
+   "days_since_training": 380,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.7297921478060047,
+   "word_error_rate_dictionary": 0.9630872483221476,
+   "n_val_trials": 47
+  },
+  {
+   "session": "t15.2025.01.12",
+   "days_since_training": 380,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.481139337952271,
+   "word_error_rate_dictionary": 0.7651006711409396,
+   "n_val_trials": 47
+  },
+  {
+   "session": "t15.2025.01.12",
+   "days_since_training": 380,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.2963818321785989,
+   "word_error_rate_dictionary": 0.5268456375838926,
+   "n_val_trials": 47
+  },
+  {
+   "session": "t15.2025.03.14",
+   "days_since_training": 441,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.7662721893491125,
+   "word_error_rate_dictionary": 0.9876543209876543,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2025.03.14",
+   "days_since_training": 441,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.6923076923076923,
+   "word_error_rate_dictionary": 0.9629629629629629,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2025.03.14",
+   "days_since_training": 441,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.5162721893491125,
+   "word_error_rate_dictionary": 0.8395061728395061,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2025.03.16",
+   "days_since_training": 443,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.6989528795811518,
+   "word_error_rate_dictionary": 0.9883720930232558,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2025.03.16",
+   "days_since_training": 443,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.6544502617801047,
+   "word_error_rate_dictionary": 0.9011627906976745,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2025.03.16",
+   "days_since_training": 443,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.39267015706806285,
+   "word_error_rate_dictionary": 0.6395348837209303,
+   "n_val_trials": 24
+  },
+  {
+   "session": "t15.2025.03.30",
+   "days_since_training": 457,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.7448275862068966,
+   "word_error_rate_dictionary": 1.0,
+   "n_val_trials": 30
+  },
+  {
+   "session": "t15.2025.03.30",
+   "days_since_training": 457,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.6459770114942529,
+   "word_error_rate_dictionary": 0.9166666666666666,
+   "n_val_trials": 30
+  },
+  {
+   "session": "t15.2025.03.30",
+   "days_since_training": 457,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.47701149425287354,
+   "word_error_rate_dictionary": 0.7450980392156863,
+   "n_val_trials": 30
+  },
+  {
+   "session": "t15.2025.04.13",
+   "days_since_training": 471,
+   "n_sentences": 0,
+   "phoneme_error_rate": 0.7047075606276747,
+   "word_error_rate_dictionary": 0.9811320754716981,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2025.04.13",
+   "days_since_training": 471,
+   "n_sentences": 10,
+   "phoneme_error_rate": 0.5606276747503567,
+   "word_error_rate_dictionary": 0.8553459119496856,
+   "n_val_trials": 25
+  },
+  {
+   "session": "t15.2025.04.13",
+   "days_since_training": 471,
+   "n_sentences": 50,
+   "phoneme_error_rate": 0.3281027104136947,
+   "word_error_rate_dictionary": 0.5534591194968553,
+   "n_val_trials": 25
+  }
+ ]
+}
