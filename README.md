@@ -1,5 +1,5 @@
 # NeuroScribe
-**TL;DR** This project decodes attempted speech from neural data into text. We reached a 13.7% phoneme error rate and almost 80% of our translated words were correct.
+This project decodes attempted speech from neural data into text. We reached a 13.7% phoneme error rate and almost 80% of our translated words were correct.\
 **Track:** AI + Languages\
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
@@ -47,7 +47,7 @@ The data from the lab was collected across 45 sessions over the span of two year
 | --- | --- | --- | --- | ---
 | Number of sentences | 7,264 | 808 | 1,426 | 1,450 |
 | Does it contain the true sentence? | Yes | Yes | Yes | No |
-| Where does it comes from? | Authors' training files | A random 10% of the authors' training files, per session | Authors' validation files | Authors' test files |
+| Where does it come from? | Authors' training files | A random 10% of the authors' training files, per session | Authors' validation files | Authors' test files |
 | What is it used for? | Teaching the model | Used during training to check progress and determine which iteration is the best and should be saved | Final measurement | Demo input only |
 
 We kept the dataset's official train/val split (instead of re-splitting it ourselves) so our final score is directly comparable to the published one. We treated `tune` as the "practice test", used for every decision we made, and `val` as the "final exam", which was never used at all during the training process. Because of this, `val` scores are real results on unseen data.
@@ -67,7 +67,7 @@ This allowed us to compare performance of models as the training duration change
 
 We were then interested in exploring the concept of signal drift, which is essentially the brain's neural patterns changing over time. To explore this, we trained a model (40,000 batches) on only the first 27 sessions (Aug 11 to Dec 29, 2023; 4,629 training sentences). We then tested it on the val sentences from 15 of the 18 later sessions (508 sentences, 2 to 15.5 months after the last training day; the other 3 have no val sentences) and graphed how the accuracy of our model changed depending on the time since the last data the model trained on was collected. For each later session we also tried a quick "recalibration": retraining only that day's small per-session layer on 10 or 50 of its sentences, with the shared network locked.
 
-Finally, we tested three different approaches on how to best utilise the language model. We ran three different tests, providing Gemini with three different things: a) phonemes plus the dictionary's candidate words (our method), b) phonemes only, and c) phonemes with the network's runner-up sounds and their probabilities. Along the way we found that switching from Gemini 3.5 Flash Lite to Gemini 3.1 Flash Lite lowered tune word error from 17.0% to 14.8% with the same method, so we switched (a choice made on tune only) and then scored val once with it.
+Finally, we tested three different approaches on how to best utilize the language model. We ran three different tests, providing Gemini with three different things: a) phonemes plus the dictionary's candidate words (our method), b) phonemes only, and c) phonemes with the network's runner-up sounds and their probabilities. Along the way we found that switching from Gemini 3.5 Flash Lite to Gemini 3.1 Flash Lite lowered tune word error from 17.0% to 14.8% with the same method, so we switched (a choice made on tune only) and then scored val once with it.
 
 All results from the models above are shown in [Results](#Results)
 
@@ -171,7 +171,7 @@ Some other things we learned from the results:
 - **The language model helps, but not everywhere.** Compared with the dictionary decoder, it improved 366 sentences, made 48 worse and left 1,012 the same (total wrong words 2,399 -> 1,992). It cuts word error by 4 to 8 points on most kinds of sentence, but barely helps on random word lists (53.0% -> 52.5%) or very short sentences (1-3 words: 32.2% -> 29.7%), where there is little context to lean on. It can also "fix" a sentence into the wrong thing: "so do you like your new truck" (which the dictionary decoder got right) became "so do you like your new track."
 - **Which language model matters, and more information isn't always better.** Swapping Gemini 3.5 Flash Lite for 3.1 Flash Lite, with nothing else changed, improved word error by about 2 points on both tune and val. Giving Gemini the network's uncertainty about each sound made it *worse* than using no language model at all: it changed words that were right, added extra words and dropped apostrophes.
 - **The model goes stale.** Within about two and a half months of its last training day, a model goes from usable to getting roughly half its phonemes wrong. Recalibrating just the per-session layer on 50 sentences (a few minutes of attempted speech) recovers most, but not all, of the loss, and helps less the older the model is. A real user would need to recalibrate every month or two.
-- **Repeated wording didn't help.** The 162 val sentences whose wording also appears in training scored worse (25.0% word error) than new wording (20.6%), so the model is not just memorising sentences.
+- **Repeated wording didn't help.** The 162 val sentences whose wording also appears in training scored worse (25.0% word error) than new wording (20.6%), so the model is not just memorizing sentences.
 - **Many mistakes are words that sound alike.** For example, "my computer is not working anymore" became "my company is not working anymore." Even with perfect phonemes, words like "to"/"too"/"two" cause some errors.
 - **The data curve hasn't flattened.** Going from 10% to 25% of the data cut error by 11.8 points, 25% to 50% by 6.2 points, and 50% to 100% by 3.3 points. More recordings from this participant would probably still improve the model.
 
@@ -194,7 +194,7 @@ Additionally, we could expand on this by increasing integration and allowing thi
 As always, our model can definitely be improved. Another possible course of action is to tweak numbers and get our hands on more extensive resources in order to train a more powerful and accurate model.
 
 ## Demo video
-Link to our demo vide: [YouTube](https://www.youtube.com/watch?v=6myo24AHVIQ)
+Link to our demo video: [YouTube](https://www.youtube.com/watch?v=6myo24AHVIQ)
 
 ## Sources
 "An accurate and rapidly calibrating speech neuroprosthesis" by Card et al. (2024)
