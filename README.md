@@ -66,29 +66,29 @@ All results from the models above are shown in [Results](#Results)
 ## Results
 Our baseline linear model had a PER (phoneme error rate) of about 61%.
 
-Here's an example of our model at work!
-Original, intended sentence: the jury and a judge work together on it
-Model translation: youths i i i i i aycock are i it
+Here's an example of our model at work!\
+Original, intended sentence: the jury and a judge work together on it\
+Model translation: youths i i i i i aycock are i it\
 
 Our second model had a PER of about 10.4%. After 4,000 batches, our model had a PER of 36.2%, 23.1% at 8,000, and 13.2% after 24,000 batches completed.
 
-Here's an example of our model at work!
-Original, intended sentence: the jury and a judge work together on it
-Model translation: the jury and a just work together on it
+Here's an example of our model at work!\
+Original, intended sentence: the jury and a judge work together on it\
+Model translation: the jury and a just work together on it\
 
 Our four overnight models (40,000 batches each) trained on 10%, 25%, 50%, and 100% of the training sentences had PERs of 34.5%, 22.7%, 16.5%, and 13.2% respectively.
 
-Here's an example of our models at work!
-10%: The participant's intended speech of "the jury and a judge work together on it" turned into "the tree in a judge would consider on it"
-25%: The participant's intended speech of "the jury and a judge work together on it" turned into "the tree and a change work other on it"
-50%: The participant's intended speech of "the jury and a judge work together on it" turned into "the jury and a judge work another on it"
-100%: The participant's intended speech of "the jury and a judge work together on it" turned into "the jury and a just work on it"
+Here's an example of our models at work!\
+10%: The participant's intended speech of "the jury and a judge work together on it" turned into "the tree in a judge would consider on it"\
+25%: The participant's intended speech of "the jury and a judge work together on it" turned into "the tree and a change work other on it"\
+50%: The participant's intended speech of "the jury and a judge work together on it" turned into "the jury and a judge work another on it"\
+100%: The participant's intended speech of "the jury and a judge work together on it" turned into "the jury and a just work on it"\
 
 Our trained model with 80,000 batches with all of the training sentences had a PER of 11%.
 
-Here's an example of our model at work!
-Original, intended sentence: the jury and a judge work together on it
-Model translation: the jury and a just work together on it
+Here's an example of our model at work!\
+Original, intended sentence: the jury and a judge work together on it\
+Model translation: the jury and a just work together on it\
 
 Our drift measurement model produced the graph shown below.
 
