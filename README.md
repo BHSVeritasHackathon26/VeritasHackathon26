@@ -193,6 +193,9 @@ Additionally, we could expand on this by increasing integration and allowing thi
 
 As always, our model can definitely be improved. Another possible course of action is to tweak numbers and get our hands on more extensive resources in order to train a more powerful and accurate model.
 
+## Demo video
+Link to our demo vide: [YouTube](https://www.youtube.com/watch?v=6myo24AHVIQ)
+
 ## Sources
 "An accurate and rapidly calibrating speech neuroprosthesis" by Card et al. (2024)
 - [Full paper on New England Journal of Medicine](https://www.nejm.org/doi/full/10.1056/NEJMoa2314132?referrer=https%3A%2F%2Fgithub.com%2F)
