@@ -183,8 +183,10 @@ def make_preview(x, rows=32, cols=120):  # the explorer asks for a finer one
         return None
 
 
-DEMO_SENTENCES = ["This is a placeholder sentence", "The model is not connected yet",
-                  "Real predictions will appear here"]
+# Placeholder output for demo mode (no model connected). Phonemes are ARPAbet, "|" = word break.
+DEMO = [("This is a placeholder sentence", "DH IH S | IH Z | AH | P L EY S HH OW L D ER | S EH N T AH N S"),
+        ("The model is not connected yet", "DH AH | M AA D AH L | IH Z | N AA T | K AH N EH K T AH D | Y EH T"),
+        ("Real predictions will appear here", "R IY L | P R IH D IH K SH AH N Z | W IH L | AH P IH R | HH IH R")]
 
 
 def run_model(features, info, index):
@@ -192,7 +194,8 @@ def run_model(features, info, index):
     and no label reading anywhere in it, and gradients are switched off below."""
     if STATE["demo"]:
         time.sleep(0.12)  # so the demo feels like real decoding
-        return {"text": DEMO_SENTENCES[index % len(DEMO_SENTENCES)]}
+        text, phonemes = DEMO[index % len(DEMO)]
+        return {"text": text, "phonemes": phonemes}
     with PREDICT_LOCK, _no_grad():
         out = model_adapter.predict(STATE["model"], features, info)
     if isinstance(out, dict):
@@ -217,6 +220,12 @@ def _line(obj):
 @app.get("/")
 def index():
     return FileResponse(HERE / "static" / "index.html", headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/explorer")
+def explorer_page():
+    """The held-out sentence explorer (true vs predicted), kept off the simple front page."""
+    return FileResponse(HERE / "static" / "explorer.html", headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/api/status")
