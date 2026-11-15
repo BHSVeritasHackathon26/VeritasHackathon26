@@ -74,6 +74,17 @@
   .target { margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--edge); }
   .target span { display: block; font: 700 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); margin-bottom: 4px; }
   .target p { margin: 0; font: 600 clamp(17px, 3vw, 21px)/1.35 var(--head); color: var(--mute); overflow-wrap: anywhere; }
+  .model { margin-top: 14px; font-size: 14px; color: var(--mute); }
+  .model b { color: var(--navy); font-weight: 700; }
+  .stage { animation: fade .25s ease-out backwards; }
+  .stage + .mini + .stage { animation-delay: .22s; }
+  .stlabel { font: 700 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); margin-bottom: 4px; }
+  .stlabel small { font: 400 13px var(--body); letter-spacing: 0; text-transform: none; margin-left: 6px; }
+  .stext { font: 600 clamp(18px, 3.4vw, 22px)/1.35 var(--head); overflow-wrap: anywhere; min-height: 30px; }
+  .stext.note { font: 400 15px/1.45 var(--body); color: var(--mute); }
+  .mini { display: grid; place-items: center; height: 30px; color: var(--blue); }
+  .mini svg { width: 18px; height: 18px; }
+  .sentence::first-letter { text-transform: uppercase; }
   .sentence.err { font: 600 15px var(--body); color: var(--bad); }
   .speak { border: 2px solid var(--edge); background: #fff; border-radius: 12px; width: 38px; height: 38px; display: none; place-items: center; padding: 0; }
   .speak:hover { border-color: var(--blue); } .speak.on { border-color: var(--blue); background: var(--pale); }
@@ -120,17 +131,25 @@
 
   <section class="card" id="c2">
     <header><span class="num">2</span><h2>Phonemes</h2><div class="side">the sounds the model decoded</div></header>
-    <div class="body"><div class="phonemes" id="phonemes"><span class="placeholder">Waiting for a file…</span></div></div>
+    <div class="body"><div class="phonemes" id="phonemes"><span class="placeholder">Waiting for a file…</span></div>
+      <div class="model" id="modelLine"></div></div>
   </section>
 
   <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg></div>
 
   <section class="card" id="c3">
-    <header><span class="num">3</span><h2>Sentence</h2>
-      <div class="side"><button class="speak" id="speak" aria-label="Read aloud" title="Read aloud"></button></div>
+    <header><span class="num">3</span><h2>Words</h2><div class="side">from sounds to a sentence</div></header>
+    <div class="body" id="words"></div>
+  </section>
+
+  <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg></div>
+
+  <section class="card" id="c4">
+    <header><span class="num">4</span><h2>Sentence</h2>
+      <div class="side"><span id="finalSrc"></span><button class="speak" id="speak" aria-label="Read aloud" title="Read aloud"></button></div>
     </header>
     <div class="body"><div class="sentence" id="sentence"><span class="placeholder" style="font:400 16px var(--body)">Waiting for a file…</span></div>
-      <div class="target" id="target" hidden><span>Target sentence</span><p id="targetText"></p></div>
+      <div class="target" id="target" hidden><span>Attempted sentence</span><p id="targetText"></p></div>
     </div>
   </section>
 
@@ -139,12 +158,13 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const S = { results: [], sel: -1, total: 0, xhr: null };
+const S = { results: [], sel: -1, total: 0, xhr: null, status: null };
 
 /* ---------- is the real model connected? ---------- */
 (async function status() {
   try {
     const s = await (await fetch('/api/status', { cache: 'no-store' })).json(), d = $('demo');
+    S.status = s; setModelLine(s); showWords(S.results[S.sel] || null);
     if (s.load_error) { d.textContent = 'The model failed to load. See the server terminal for the error.'; d.className = 'demo show err'; }
     else if (s.demo) { d.textContent = 'Demo mode: no model connected yet, so these are placeholder results.'; d.className = 'demo show'; }
     else d.className = 'demo';
@@ -169,7 +189,7 @@ function decodeFile(file) {
   $('nav').style.display = 'none';
   $('inBody').classList.add('loaded', 'busy');
   $('fname').textContent = file.name; $('fsub').textContent = 'Uploading…'; $('barFill').style.width = '0%';
-  setStage(1); showPhonemes(null); showSentence(null);
+  setStage(1); showPhonemes(null); showWords(null); showSentence(null);
 
   const xhr = S.xhr = new XMLHttpRequest(), form = new FormData(); form.append('file', file);
   let seen = 0;
@@ -207,19 +227,23 @@ function finish() {
 }
 function fail(msg) {
   S.xhr = null; $('inBody').classList.remove('loaded', 'busy');
-  showPhonemes(null); showSentence({ error: msg }); setStage(0);
+  showPhonemes(null); showWords(null); showSentence({ error: msg }); setStage(0);
 }
 
 /* ---------- the three boxes ---------- */
 function select(i) {
   const r = S.results[i]; if (!r) return;
   S.sel = i; updateNav();
-  if (r.error) { showPhonemes(null, 'No phonemes for this one.'); showSentence(r); setStage(1); return; }
+  clearTimeout(select.t);
+  if (r.error) { showPhonemes(null, 'No phonemes for this one.'); showWords(null); showSentence(r); setStage(1); return; }
   const ph = toList(r.phonemes);
   setStage(2); showPhonemes(ph, ph ? null : 'This model did not return phonemes.');
-  const delay = ph ? Math.min(450, ph.length * 14 + 120) : 0;      // let the phonemes land, then the sentence
-  clearTimeout(select.t);
-  select.t = setTimeout(() => { if (S.sel !== i) return; setStage(3); showSentence(r); speak(r.text); }, delay);
+  showWords(null); showSentence(null);
+  const delay = ph ? Math.min(450, ph.length * 14 + 120) : 0;      // phonemes land, then the words, then the sentence
+  select.t = setTimeout(() => {
+    if (S.sel !== i) return; setStage(3); showWords(r);
+    select.t = setTimeout(() => { if (S.sel !== i) return; setStage(4); showSentence(r); speak(r.text); }, 520);
+  }, delay);
 }
 const toList = p => p == null ? null : (Array.isArray(p) ? p : String(p).split(/\s+/)).filter(Boolean).map(t => /^(sil|<sil>)$/i.test(t) ? '|' : t);
 function showPhonemes(list, note) {
@@ -230,12 +254,37 @@ function showPhonemes(list, note) {
     const s = document.createElement('span'); s.className = 'ph'; s.textContent = p; s.style.animationDelay = Math.min(k * 12, 400) + 'ms'; el.append(s);
   });
 }
+function setModelLine(s) {
+  const el = $('modelLine'); el.textContent = '';
+  if (!s) return;
+  const b = document.createElement('b'); b.textContent = 'Model: ';
+  el.append(b, s.demo ? 'none connected yet (demo mode)' : (s.model_name || 'trained model'));
+}
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg>';
+function stageBlock(label, hint, text, note) {
+  const d = document.createElement('div'); d.className = 'stage';
+  const l = document.createElement('div'); l.className = 'stlabel'; l.textContent = label;
+  if (hint) { const h = document.createElement('small'); h.textContent = hint; l.append(h); }
+  const t = document.createElement('div'); t.className = 'stext' + (text ? '' : ' note'); t.textContent = text || note;
+  d.append(l, t); return d;
+}
+function showWords(r) {           // box 3: the dictionary's words, then the language model's
+  const el = $('words'); el.textContent = '';
+  if (!r || r.error) { const t = document.createElement('div'); t.className = 'stext note'; t.textContent = 'Waiting for a file…'; el.append(t); return; }
+  const lm = S.status && S.status.llm_model ? 'Gemini · ' + S.status.llm_model : 'Gemini';
+  const notes = { differs: 'Not shown: this recording decoded to different phonemes than the saved language-model run, so that saved result does not apply.',
+                  unsaved: 'Not run for this file. Language-model results are only saved for the held-out sentences.' };
+  const mini = document.createElement('div'); mini.className = 'mini'; mini.innerHTML = ARROW;
+  el.append(stageBlock('After the dictionary', 'each group of sounds becomes the closest real word', r.dictionary != null ? r.dictionary : r.text, '(empty)'),
+            mini, stageBlock('After the language model', lm, r.llm, notes[r.llm_status] || notes.unsaved));
+}
 function showTarget(r) {
   const t = r && !r.error && r.target ? r.target : '';
   $('target').hidden = !t; $('targetText').textContent = t;
 }
 function showSentence(r) {
   showTarget(r);
+  $('finalSrc').textContent = r && !r.error && r.final_source ? 'from the ' + r.final_source : '';
   const el = $('sentence'); el.className = 'sentence'; el.textContent = '';
   $('speak').style.display = r && !r.error ? 'grid' : 'none';
   if (!r) { const s = document.createElement('span'); s.className = 'placeholder'; s.style.font = '400 16px var(--body)'; s.textContent = 'Waiting for a file…'; el.append(s); return; }
@@ -243,7 +292,7 @@ function showSentence(r) {
   el.textContent = r.text || '(empty)';
 }
 function setStage(n) {      // highlight the box that is working / just finished
-  ['c1', 'c2', 'c3'].forEach((id, k) => { $(id).classList.toggle('active', k === Math.max(0, n - 1)); $(id).classList.toggle('done', k < n - 1 || (n === 3 && k === 2)); });
+  ['c1', 'c2', 'c3', 'c4'].forEach((id, k) => { $(id).classList.toggle('active', k === Math.max(0, n - 1)); $(id).classList.toggle('done', k < n - 1 || (n === 4 && k === 3)); });
   $('c1').classList.toggle('done', n >= 2);
 }
 
@@ -276,6 +325,7 @@ function speak(text) {
 }
 function stopSpeaking() { if (canSpeak) { speechSynthesis.cancel(); $('speak').classList.remove('on'); } }
 $('speak').addEventListener('click', () => { if ($('speak').classList.contains('on')) stopSpeaking(); else { const r = S.results[S.sel]; if (r) speak(r.text); } });
+showWords(null);
 </script>
 </body>
 </html>

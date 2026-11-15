@@ -45,22 +45,35 @@ Anyone with a link can use the app, so stop the server when you are done.
 
 ## 3. Use it
 
-The front page is three boxes, top to bottom, one per stage:
+The front page is a stack of boxes, one per stage:
 
 1. **Input**: drag a `.hdf5` file onto the page (or click the box to browse).
-2. **Phonemes**: the sounds the model decoded, as a row of pills (gaps = word breaks).
-3. **Sentence**: the sentence those sounds turn into, read aloud automatically.
-   The speaker button replays it.
+2. **Phonemes**: the sounds the model decoded, as a row of pills (gaps = word breaks),
+   with the name of the model underneath (`MODEL_NAME` in `model_adapter.py`).
+3. **Words**: what happens between the sounds and the sentence:
+   - **After the dictionary**: each group of sounds becomes the closest real word.
+     This runs live for every file.
+   - **After the language model**: Gemini picks the most sensible words in context.
+4. **Sentence**: the final sentence, read aloud automatically (the speaker button
+   replays it), with the **Attempted sentence** (what the participant was trying to say)
+   underneath when it is known.
 
 A file holds many sentences. The first one shows right away and the rest keep
 decoding behind it; use the ‹ › buttons (or the arrow keys) in the Input box to
 step through them.
 
 Box 2 shows the `phonemes` that `predict()` returns (a string such as `AY | N OW`, or a
-list; `|` is a word break). If a model returns only a sentence, box 2 says so.
+list; `|` is a word break). The dictionary sentence is the `text` that `predict()` returns.
+
+The language-model step is **not run live**: it needs a Gemini API key and internet, so
+`model_adapter.py` skips it. Instead the page shows the sentence saved for that recording in
+`results/run_a_val.json` (the held-out sentences), but only when this recording's phonemes
+are identical to the saved ones. Any other file, such as a brand-new test file, shows
+"Not run for this file" in that row, and the final sentence is the dictionary sentence
+(the box says which one it is).
 
 When the sentence the participant was trying to say is known, it appears under the
-prediction as a grey **Target sentence**. It comes from the file's own label if it
+final sentence as a grey **Attempted sentence**. It comes from the file's own label if it
 has one (`sentence_label` or `transcription`), otherwise from the saved held-out
 results in `results/run_a_val.json` (matched by session, block and trial). Unlabeled
 test files simply show nothing there. The target is for display only: it is never
