@@ -3,13 +3,13 @@
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
 ## The problem
-Many people have lost the ability to speak throughout their life. They've never lived without being able to speak, so they would be placed into a brand-new, life changing scenario that they probably don't know how to navigate.
+Hundreds of thousands of people lose the ability to speak because of a loss of motor control of the jaw. Communication is essentially for quality of life and for daily function, and losing the ability to speak is a life changing scenario that's difficult to navigate.
 
-These people have one strong characteristic over people who have been unable to speak their whole lives - they still *know* how to move their mouth to make the sounds to speak, even if they can't make the actual noise.
-
-**Who it's for:** an adult with ALS who can no longer speak clearly, at the moment they want to tell a family member or carer something. The input is neural activity recorded while they *attempt* to speak; the output is the sentence as text.
+**Who it's for:** an adult with ALS (amyotrophic lateral sclerosis) or another motor dysfunction who can no longer speak clearly, at the moment they want to tell a family member or carer something. The input is neural activity recorded while they *attempt* to speak; the output is the sentence as text or voice.
 
 ## What we built
+Those people, however, have a strong advantage over those who have been unable to speak their whole lives - their brains still *know* how to speak, even if they can't make the actual noise. 
+
 We built a model to interpret neural signals from someone's brain into intended speech, allowing English-speakers to effectively convert thought to text.
 
 Using BCI (brain computer interfaces), it is possible to receive information about neural firings in specific parts of the brain. This data acts as the input for our model. Our model outputs predicted phonemes, which can then be converted into real English words and sentences.
@@ -27,7 +27,7 @@ In more detail, the pipeline has these steps:
 1. **Input.** Every 20ms, 512 numbers describing neural activity near 256 electrodes in the part of the brain that controls speech movements.
 2. **Smoothing and windows.** The signal is smoothed and cut into overlapping 280ms windows, one every 80ms.
 3. **Per-session layer.** Each recording day has its own small layer that re-maps that day's signals into a common form. This is the "personal" part of the model.
-4. **Shared recurrent network (GRU).** Carries a memory through the sentence and outputs, for each window, a score for each of 41 classes (39 phonemes, a silence marker between words, and a "blank").
+4. **Shared recurrent network (GRU).** Outputs a distribution of the probability that the person was trying to say each of the 41 sounds
 5. **Reading out phonemes.** Take the top class per window, merge repeats and drop blanks.
 6. **Phonemes to words.** We built two decoders: one looks up each word-chunk in the [CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) by closest match, and the other gives a language model (Google Gemini 3.1 Flash Lite) each chunk plus the dictionary's five closest words and asks for the most likely sentence.
 
@@ -47,37 +47,37 @@ The data from the lab was collected across 45 sessions over the span of two year
 | Where does it comes from? | Authors' training files | A random 10% of the authors' training files, per session | Authors' validation files | Authors' test files |
 | What is it used for? | Teaching the model | Used during training to check progress and determine which iteration is the best and should be saved | Final measurement | Demo input only |
 
-We kept the dataset's official train/val split (instead of re-splitting it ourselves) so our final score is directly comparable to the published one. We treated `tune` as the "practice test", used for every decision we made, and `val` as the "final exam", which was never used to choose anything. Because of this, `val` scores are our honest results on unseen data.
+We kept the dataset's official train/val split (instead of re-splitting it ourselves) so our final score is directly comparable to the published one. We treated `tune` as the "practice test", used for every decision we made, and `val` as the "final exam", which was never used at all during the training process. Because of this, `val` scores are real results on unseen data.
 
 A few other key decisions:
 - **Predict phonemes, not words.** The recorded brain area controls speech *movements*, and 41 phoneme classes are far easier to learn than a whole vocabulary.
 - **Skip the authors' n-gram language models.** They need about 60-300 GB of RAM, so we used the dictionary and Gemini decoders described above instead.
 - **Keep everything participant-specific in one config file**, so the same code can be retrained on another person's data.
 
-First, we trained a very basic and rudimentary linear model in about 6 minutes (5,000 batches of 64 sentences) to set a baseline for our prediction. Next, we trained a more advanced model (a GRU network), which took about 5.5 hours (running 120,000 total batches). This model used 5 recurrent layers of 768 units as opposed to the linear model's single layer, as well as using 44.3M parameters to the linear model's 294k. These upgrades were in addition to having a larger dataset to train on and training for longer. We did try to train the second model with 60,000 batches with a batch size of 64, but our machine ran out of memory, so we used 120,000 batches with a batch size of 32. (Sentences range from about 3 to 50 seconds, and a batch that happened to contain a very long sentence needed far more memory than our 11 GB GPU had. The authors trained on a 24 GB card.) Halving the batch size while doubling the number of batches meant the model still saw the same total number of sentences.
+First, we trained a very basic and rudimentary linear model in about 6 minutes (5,000 batches of 64 sentences) to set a baseline for our prediction. Next, we trained a more advanced model (a GRU network), which took roughly 5.5 hours (running 120,000 total batches). This model used 5 recurrent layers of 768 units as opposed to the linear model's single layer, as well as using 44.3M parameters to the linear model's 294k. These upgrades were in addition to having a larger dataset to train on and training for longer. We did try to train the second model with 60,000 batches with a batch size of 64, but our machine ran out of memory, so we used 120,000 batches with a batch size of 32. (Sentences range from about 3 to 50 seconds, and a batch that happened to contain a very long sentence needed far more memory than our 11 GB GPU had. The authors trained on a 24 GB card.) 
 
-We also hit a problem with the Gemini decoder: it returned nothing on realistic batches of 20 garbled sentences, because the model's "thinking" used up its whole output allowance before it wrote an answer. Lowering the thinking level, raising the output limit and cutting batches to 10 sentences fixed it.
+After that, we wanted to test how the accuracy changes with the size of training data. When training each model with 40,000 batches, we trained four models with 10% (729 sentences), 25% (1,815), 50% (3,632) and 100% (7,264) of the training sentences.
 
-After that, we wanted to test how the accuracy changes with the size of training data. On less time (40,000 batches), we trained four models with 10% (729 sentences), 25% (1,815), 50% (3,632) and 100% (7,264) of the training sentences. This training ran overnight.
+This gave us two models trained on 100% of the training sentences at 40,000 batches and 120,000 batches respectively. Finally, we trained a model using 100% of the training sentences at 80,000 batches.
 
-That gave us two models trained on 100% of the training sentences at 40,000 batches and 120,000 batches respectively. The clear next step for us was to train a model using 100% of the training sentences at 80,000 batches.
+This allowed us to compare performance of models as the training duration changes.
 
-We were then prompted to explore the concept of signal drift, which is essentially the brain's neural patterns changing over time. To explore this, we trained a model (40,000 batches) on only the first 27 sessions (Aug 11 to Dec 29, 2023; 4,629 training sentences). We then tested it on the val sentences from 15 of the 18 later sessions (508 sentences, 2 to 15.5 months after the last training day; the other 3 have no val sentences) and graphed how the accuracy of our model changed depending on the time since the last data the model trained on was collected. For each later session we also tried a quick "recalibration": retraining only that day's small per-session layer on 10 or 50 of its sentences, with the shared network locked.
+We were then interested in exploring the concept of signal drift, which is essentially the brain's neural patterns changing over time. To explore this, we trained a model (40,000 batches) on only the first 27 sessions (Aug 11 to Dec 29, 2023; 4,629 training sentences). We then tested it on the val sentences from 15 of the 18 later sessions (508 sentences, 2 to 15.5 months after the last training day; the other 3 have no val sentences) and graphed how the accuracy of our model changed depending on the time since the last data the model trained on was collected. For each later session we also tried a quick "recalibration": retraining only that day's small per-session layer on 10 or 50 of its sentences, with the shared network locked.
 
-Finally, we tested what the language model should be shown. On the 808 tune sentences we compared three versions of the Gemini decoder: phonemes plus the dictionary's candidate words (our method), phonemes only, and phonemes with the network's runner-up sounds and their probabilities. Along the way we found that switching from Gemini 3.5 Flash Lite to Gemini 3.1 Flash Lite lowered tune word error from 17.0% to 14.8% with the same method, so we switched (a choice made on tune only) and then scored val once with it.
+Finally, we tested three different approaches on how to best utilise the language model. We ran three different tests, providing Gemini with three different things: a) phonemes plus the dictionary's candidate words (our method), b) phonemes only, and c) phonemes with the network's runner-up sounds and their probabilities. Along the way we found that switching from Gemini 3.5 Flash Lite to Gemini 3.1 Flash Lite lowered tune word error from 17.0% to 14.8% with the same method, so we switched (a choice made on tune only) and then scored val once with it.
 
 All results from the models above are shown in [Results](#Results)
 
 ## Results
 The PERs (phoneme error rates) in this first part are on the `tune` split. The example translations are one held-out `val` sentence, decoded with the dictionary decoder (no language model).
 
-Our baseline linear model had a PER of about 61% (61.1%).
+Our baseline linear model had a PER of 61.1%.
 
 Here's an example of our model at work!\
 Original, intended sentence: the jury and a judge work together on it\
 Model translation: youths i i i i i aycock are i it
 
-Our second model had a PER of about 10.4%. After 4,000 batches, our model had a PER of 36.2%, 23.1% at 8,000, and 13.2% after 24,000 batches completed. It stopped improving much after about 56,000 batches (10.6%).
+Our second model had a PER of 10.4%. After 4,000 batches, our model had a PER of 36.2%, 23.1% at 8,000, and 13.2% after 24,000 batches completed. It stopped improving much after about 56,000 batches (10.6%).
 
 Here's an example of our model at work!\
 Original, intended sentence: the jury and a judge work together on it\
@@ -99,7 +99,7 @@ Model translation: the jury an a just work another on it
 
 So with all of the training data, 40,000, 80,000 and 120,000 batches gave tune PERs of 13.2%, 11.0% and 10.4%: most of the benefit of longer training is in by 80,000 batches.
 
-Our drift model reached 10.5% tune PER on its own 27 sessions, but on the later sessions it did much worse:
+Our drift model reached 10.5% tune PER on its own 27 sessions (the `tune` data split), but on the later sessions it did much worse:
 
 | Condition (508 val sentences from 15 later sessions) | Phoneme error | Word error (dictionary) |
 | --- | --- | --- |
@@ -124,7 +124,7 @@ The language-model comparison on tune (word error, same 808 sentences, Gemini 3.
 ![Language model methods](figures/language_model_methods_tune.png)
 
 ### Results on unseen data
-All of the numbers above (except the drift experiment and the example translations) are on the `tune` split. Here is how our final model (120,000 batches) and the baseline did on the 1,426 held-out `val` sentences, which the model never learned from and which were never used to make any decisions:
+All of the numbers above (except the drift experiment and the example translations) are on the `tune` split. Here is how our final model (120,000 batches) and the baseline did on the 1,426 held-out `val` sentences, which the model never learned from and which were never used to make any decisions during training:
 
 | | Linear baseline | Our final model |
 | --- | --- | --- |
