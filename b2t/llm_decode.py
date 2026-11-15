@@ -161,6 +161,74 @@ def llm_decode(decoder, all_ids, model=DEFAULT_MODEL, batch_size=10, pause=4.0,
     return results, fallbacks
 
 
+
+# ---------------------------------------------------------------------------
+# Two more ways of asking, without the dictionary. Used by b2t.llm_compare to
+# test whether they beat the dictionary-candidates prompt above.
+# ---------------------------------------------------------------------------
+
+RULES = """\
+Rules:
+- Stay faithful to the sounds. Do not add, drop or reorder words to improve grammar.
+- Word breaks are sometimes wrong: sounds on either side of a break may belong to
+  one word, and one group of sounds may be two words.
+- Write each sentence in lower case with no punctuation except apostrophes.
+
+Return one decoded sentence for every numbered line, in the same order.
+"""
+
+INSTRUCTIONS_PHONEMES = """\
+You are part of a brain-computer interface that helps a person who cannot speak.
+A neural network turned their brain activity into phonemes (ARPAbet symbols), and it
+makes some mistakes. Your job is to work out the sentence they were trying to say.
+
+Each numbered line below is one sentence: its phonemes in order, with | marking a
+break between words.
+
+""" + RULES
+
+INSTRUCTIONS_ALTERNATIVES = """\
+You are part of a brain-computer interface that helps a person who cannot speak.
+A neural network turned their brain activity into phonemes (ARPAbet symbols), and it
+makes some mistakes. Your job is to work out the sentence they were trying to say.
+
+Each numbered line below is one sentence: its sounds in order, with | marking a
+break between words. The network also reports how sure it was:
+- A sound written plainly, like K, is one it was confident about.
+- [D .55, T .40] means it was unsure: 55% D, 40% T. Either could be right.
+- [L .48, nothing .41] means there may be an L here, or no sound at all.
+- [nothing .70, T .25] means it heard no sound, but a T may have been missed.
+- [| .60, nothing .35] means there may or may not be a word break here.
+Use the meaning of the whole sentence to choose between the options. The first
+option in each bracket is the network's own best guess; prefer it unless another
+option makes a clearly better sentence.
+
+""" + RULES
+
+
+def llm_decode_lines(lines, instructions, fallback, model=DEFAULT_MODEL, batch_size=10,
+                     pause=4.0, ask=ask_gemini, label="language model"):
+    """Like llm_decode, but each sentence is already described as one line of text.
+
+    lines:     one description per sentence
+    fallback:  the sentences to use for any batch the model fails on
+    Returns (sentences, number that fell back).
+    """
+    results, fallbacks = [], 0
+    for start in range(0, len(lines), batch_size):
+        batch = lines[start : start + batch_size]
+        prompt = instructions + "\n" + "\n".join(f"{i}. {line}" for i, line in enumerate(batch, start=1))
+        answer, was_cached = ask_with_cache(prompt, model, ask)
+        if answer is None or len(answer) != len(batch):
+            answer = fallback[start : start + batch_size]
+            fallbacks += len(batch)
+        results.extend(normalize_text(s) for s in answer)
+        print(f"  {label}: {len(results)}/{len(lines)} sentences")
+        if not was_cached:
+            time.sleep(pause)
+    return results, fallbacks
+
+
 if __name__ == "__main__":
     # Quick connection test: python -m b2t.llm_decode [model name]
     # Sends two short made-up sentences and shows exactly what comes back.
