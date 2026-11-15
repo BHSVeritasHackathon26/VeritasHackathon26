@@ -22,7 +22,7 @@ go at the bottom. This feeds the write-up (results, what didn't work, sources).
 |---|---|---|
 | train | 7,264 | model learns from these |
 | tune | 808 | early stopping and choosing settings (random 10% of each session's official train trials, seed 0) |
-| val | 1,426 | final held-out test; not used by any code so far |
+| val | 1,426 | final held-out test. Scored once so far: Run A, Sat night (see below) |
 | test | 1,450 | no labels; demo inputs only |
 
 - The training script loads only train and tune.
@@ -35,7 +35,7 @@ go at the bottom. This feeds the write-up (results, what didn't work, sources).
 | Run | Model | Sessions | Batches | Tune phoneme error rate | Notes |
 |---|---|---|---|---|---|
 | linear | one linear layer + CTC, 293,929 parameters | all 45 | 5,000 | 61.1% | simple baseline; 14.1 batches/s |
-| run_a | GRU, 5 layers x 768 units, 44.3M parameters | all 45 | 120,000 at batch size 32 | TODO | first attempt (60,000 at batch size 64, 3.4-3.5 batches/s) ran out of memory; see below |
+| run_a | GRU, 5 layers x 768 units, 44.3M parameters | all 45 | 120,000 at batch size 32 | **10.4%** | first attempt (60,000 at batch size 64, 3.4-3.5 batches/s) ran out of memory; see below |
 | run_b | same GRU | 39 (2025 held out) | 80,000 at batch size 32 (planned, overnight) | TODO | for the calibration experiment; about 3.7 hours |
 | run_a_long | same GRU | all 45 | 180,000 at batch size 32 (planned, overnight) | TODO | same model as run_a trained 50% longer; about 8.3 hours. The authors' full length would be 240,000 at this batch size (about 11 hours), which we trimmed to free the GPU by Sunday morning |
 
@@ -85,6 +85,46 @@ This is the baseline row to compare Run A against.
 | Phoneme error rate (model alone) | 61.1% |
 | Word error rate, dictionary decoder | 95.2% |
 | Word error rate, language-model decoder | 89.7% (0 sentences fell back) |
+
+### Run A, end to end (Sat night)
+`python -m b2t.evaluate --run runs/run_a --split tune --llm --llm-model gemini-3.5-flash-lite`,
+all 808 tune sentences, the same sentences as the baseline.
+
+| Stage | Linear baseline | Run A (GRU) |
+|---|---|---|
+| Phoneme error rate (model alone) | 61.1% | 10.4% |
+| Word error rate, dictionary decoder | 95.2% | 19.1% |
+| Word error rate, language-model decoder | 89.7% | 17.0% (0 sentences fell back) |
+
+- The baseline gets about 1 word in 10 right; Run A gets about 5 in 6 right.
+- The dictionary result matches what the damaged-phoneme test suggested for about
+  10% phoneme error (roughly 20%).
+- The language model helps, but only by about 2 points (19.1% -> 17.0%). TODO: look
+  at the saved predictions to see which errors it fixes and which it cannot.
+- These are tune scores. Val will probably be somewhat worse.
+
+**Run A on val, the held-out test set (Sat night).** Same command with `--split val`,
+all 1,426 val sentences.
+
+| Stage | Run A on tune | Run A on val |
+|---|---|---|
+| Phoneme error rate (model alone) | 10.4% | 13.7% |
+| Word error rate, dictionary decoder | 19.1% | 25.4% |
+| Word error rate, language-model decoder | 17.0% | 23.1% (0 sentences fell back) |
+
+- Val is the honest number. The model never learned from val, never used it to
+  choose anything, and val comes from different recording blocks than training.
+- Why tune looks better: the model did not learn from tune either, but tune was used
+  to pick the best weights during training, and tune trials come from the same
+  recording blocks as training trials. So tune is a slightly easier, slightly
+  flattering test. It is still fine for comparing our own models with each other.
+- Like-for-like with the dataset authors: their baseline scores 10.1% phoneme error
+  on this same val set; Run A scores 13.7%. We trained for half as many sentences
+  per batch on a smaller GPU.
+- **Disclosure for the write-up:** val has now been scored once, for Run A. We did
+  not change anything in response. From here on, every choice (which model to keep,
+  any decoder changes) is made on tune only. Val is scored again only for the final
+  chosen model, and we report every val score we ever computed.
 
 Reference point: the dataset authors report 10.1% phoneme error rate on val for their
 baseline, trained for 120,000 batches.
@@ -180,6 +220,47 @@ Personal vs shared, for the "retrain for anyone" claim:
 | Phoneme list | universal | reuse |
 | Dictionary and language model | universal | reuse |
 
+### Tune vs val: the rule we follow
+- **Tune is the practice test.** Score it as often as we like and use it to decide
+  things: which model to keep, whether a decoder change helped, when to stop.
+- **Val is the final exam.** Score it to find out how good a finished model is.
+  Never use it to decide anything.
+- Neither was ever used to teach the model (no weights were adjusted on either).
+- Why two tests: when we pick the best of several options, part of the winner's
+  score is luck on those particular sentences, so its score on the test we picked
+  with is flattering. A second test that had no say in the pick gives the honest number.
+- Tune is also a bit easier than val: tune trials share recording blocks with
+  training trials; val trials share none (see `results/audit_t15.json`).
+- A "choice" is any time we look at a score and then pick, change or keep something
+  because of it. Measuring a finished model, breaking results down for the write-up,
+  and showing failure examples are not choices, so val is fine for those.
+- **In the write-up:** tune scores explain how we chose; val scores are our results
+  on unseen data. Report every val score we ever computed and when.
+
+Sunday plan for the final model:
+1. Score `run_a_long` on tune.
+2. Compare with Run A on tune (10.4% phonemes, 17.0% words with Gemini).
+3. Lower tune error wins and is the final model.
+4. If `run_a_long` wins, score it once on val: that is the headline result. If Run A
+   wins, its val score from Saturday night already is the headline result.
+5. Not allowed: scoring both on val and keeping whichever looks better.
+
+Run B is not a candidate for the final model, so it is not scored this way. It is
+used only inside the calibration experiment.
+
+### Overnight runs (started Sat 9:20 PM)
+One command, the two runs one after the other (the GPU can only fit one at a time):
+1. `run_b`: 80,000 batches, about 3.7 hours. First lines confirmed correct:
+   "Loading 39 sessions", "6667 train and 742 tune trials", "44314409 parameters on
+   cuda". 39 = 45 minus the six 2025 sessions; it has the same parameter count as
+   Run A because the six 2025 input layers exist but get no training.
+2. `run_a_long`: 180,000 batches, about 8.3 hours. Expected to finish around 9:30 AM.
+
+Also started Sat night on the CPU: the linear baseline on val, so the baseline and
+our model can be compared on the same unseen data. Writes `results/linear_val.json`.
+Check its last line says "0 sentences fell back"; if not, Gemini's daily limit ran
+out and it needs re-running (cheap, answers are cached).
+
 ### Glossary
 - **Phoneme:** a basic speech sound. "Cat" is three: K, AE, T.
 - **Trial:** one attempted sentence and its recording.
@@ -194,6 +275,12 @@ Personal vs shared, for the "retrain for anyone" claim:
   Both can exceed 100%. Lower is better.
 - **Baseline:** the simplest reasonable model, there to be beaten.
 - **train / tune / val:** learn from / check progress and choose settings / final test.
+- **Held-out data:** data kept away from training so it can act as a fair test.
+- **Recording block:** one continuous stretch of recording within a session.
+- **Checkpoint:** the model's weights saved at one point during training. We keep
+  the checkpoint with the best tune score.
+- **Leakage:** test data influencing training or choices, which makes scores look
+  better than they really are.
 - **Augmentation:** small random changes to training data so the model can't memorise it.
 - **Overfitting:** doing well on training data but worse on unseen data.
 - **Calibration:** adapting the model to a new day or person with a little of their data.
@@ -237,11 +324,18 @@ Personal vs shared, for the "retrain for anyone" claim:
 - Never put the API key in the repo; it is public.
 
 ### Still to do
-- [ ] Run A: record final tune score; score end to end on tune with both decoders
-- [ ] Start overnight runs (run_b, then run_a_long)
-- [ ] Copy `run.json` files into `results/` and push from the Linux box
+- [x] Run A finished: 10.4% tune phoneme error rate (baseline 61.1%)
+- [x] Run A scored end to end on tune: 19.1% word error (dictionary), 17.0% (Gemini)
+- [x] Overnight runs started Sat 9:20 PM (run_b, then run_a_long)
+- [ ] Linear baseline on val: record the three error rates (started Sat night)
+- [ ] Back up trained models (`runs/run_a/` etc.) to USB and a GitHub Release
+- [ ] Error breakdown on Run A's tune predictions: what does Gemini fix, what can't it?
+- [x] Linear and Run A results pushed from the Linux box (training records, tune
+      and val predictions, audit report)
+- [ ] Morning: copy `run.json` for run_b and run_a_long into `results/`, re-run the
+      audit, push
 - [ ] Calibration experiment with run_b (code not written yet)
-- [ ] Choose final model; score once on val
+- [ ] Choose final model using tune only; score it on val; report alongside Run A's val score from Sat night
 - [ ] Breakdowns and graphs (see questions below)
 - [ ] Demo app
 - [ ] Decide track and named user

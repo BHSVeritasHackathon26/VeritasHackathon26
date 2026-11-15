@@ -1,7 +1,7 @@
 {
  "participant": "t15",
- "checked_at": "2026-11-15T01:04:01+00:00",
- "code_version": "4c0c63ddc14bd010d9f46dbe77a91806a837eb53",
+ "checked_at": "2026-11-15T01:36:41+00:00",
+ "code_version": "2a1af289c2199ef6226ebd5157b9730f09850b09",
  "splits_file_first_committed": "2026-11-14T13:16:28-05:00 85682d3eb5ab051020710dd6db4188c5d073bbff",
  "all_checks_passed": true,
  "trial_counts": {
@@ -94,6 +94,34 @@
  ],
  "runs": [
   {
+   "file": "runs/linear/run.json",
+   "model": "linear",
+   "n_sessions_trained_on": 45,
+   "holdout_sessions_trained_on": [
+    "t15.2025.01.10",
+    "t15.2025.01.12",
+    "t15.2025.03.14",
+    "t15.2025.03.16",
+    "t15.2025.03.30",
+    "t15.2025.04.13"
+   ],
+   "best_tune_per": 0.6109344308296698
+  },
+  {
+   "file": "runs/run_a/run.json",
+   "model": "gru",
+   "n_sessions_trained_on": 45,
+   "holdout_sessions_trained_on": [
+    "t15.2025.01.10",
+    "t15.2025.01.12",
+    "t15.2025.03.14",
+    "t15.2025.03.16",
+    "t15.2025.03.30",
+    "t15.2025.04.13"
+   ],
+   "best_tune_per": 0.1036385745019175
+  },
+  {
    "file": "results/linear_run.json",
    "model": "linear",
    "n_sessions_trained_on": 45,
@@ -106,6 +134,20 @@
     "t15.2025.04.13"
    ],
    "best_tune_per": 0.6109344308296698
+  },
+  {
+   "file": "results/run_a_run.json",
+   "model": "gru",
+   "n_sessions_trained_on": 45,
+   "holdout_sessions_trained_on": [
+    "t15.2025.01.10",
+    "t15.2025.01.12",
+    "t15.2025.03.14",
+    "t15.2025.03.16",
+    "t15.2025.03.30",
+    "t15.2025.04.13"
+   ],
+   "best_tune_per": 0.1036385745019175
   }
  ],
  "val_sentences_with_wording_seen_in_training": {
