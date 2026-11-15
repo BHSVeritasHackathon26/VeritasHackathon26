@@ -205,7 +205,23 @@ baseline, trained for 120,000 batches.
     "medium" on the same sentences would be a cheap experiment.
   - Lessons: make error messages show what actually came back; test with realistic
     input sizes, not just a tiny example.
-- TODO, add more as they happen.
+- **The Linux box lost its internet connection mid-run (Sun afternoon).**
+  - What happened: partway through the Gemini comparison, every request failed with
+    `APIConnectionError: [Errno -3] Temporary failure in name resolution`. Pinging a
+    numeric address also failed, so the machine was offline, not just its DNS.
+  - Why it mattered: after four failed tries the script fills a batch with the
+    dictionary decoder's sentences and moves on. Left running, the "phonemes" and
+    "alternatives" scores would have been partly dictionary scores.
+  - What we did: stopped the run, waited for the connection to return, and ran the
+    same command again. Every successful answer had been saved to disk, so only the
+    failed batches were asked again. The final table shows 0 fallbacks.
+  - Lesson: check the "fell back to the dictionary" count before trusting a
+    language-model score.
+- **A results file was overwritten (Sun midday).** See the housekeeping note under
+  "Every val score we have computed".
+- **The analysis script crashed twice on new files (Sun).** Once on a results file
+  with no language-model score, once by mistaking the drift model's training record
+  for the drift results. Both fixed.
 
 ### How the whole system works, in plain words
 For the write-up's "How it works" section and for explaining to judges.
@@ -557,12 +573,71 @@ does not separate the two).
 - Random-word and Harvard samples in val will be small (a few dozen sentences
   each), so those per-type numbers will be noisy.
 
+### What should the language model be shown? (Sun afternoon)
+Question: our decoder gives Gemini, for each word, the phonemes plus the dictionary's
+five closest words. Would it do better with no dictionary at all? And would it do
+better still if it were also told how sure the neural network was about each sound?
+
+`python -m b2t.llm_compare --run runs/run_a --split tune --llm-model gemini-3.1-flash-lite`
+runs three methods on the same 808 tune sentences, with the same neural network and
+the same Gemini model:
+
+| What Gemini is shown | Word error | Ignoring apostrophes | Sentences fully correct |
+|---|---|---|---|
+| (No language model: dictionary only) | 19.1% | 19.0% | 290 |
+| **Dictionary candidates (the method we use)** | **14.8%** | 14.7% | 401 |
+| Phonemes only | 17.5% | 16.6% | 385 |
+| Phonemes with alternatives and their odds | 21.7% | 20.1% | 324 |
+
+Graph: `figures/language_model_methods_tune.png`. None of the 808 fell back.
+
+- **Our hypothesis was wrong for this setup.** We expected that handing over the
+  network's uncertainty ("55% D, 40% T") would let the language model fix sound-alike
+  errors. It made things worse than using no language model at all.
+- **The dictionary helps the language model.** Phonemes alone is 2.7 points worse
+  than phonemes with candidate words.
+- **Why the alternatives hurt, from reading the outputs:**
+  - It changes things that were right. "you've got a modem in it" was shown with
+    `[D .64, T .35]` and came back as "you've got a moment in it".
+  - It adds words. Its outputs total 5,209 words against 5,039 in the true
+    sentences ("lets do it again" became "to listen to it again").
+  - It drops apostrophes ("thats", "dont"), which count as errors: only 53 of its
+    outputs contain one, against 168 true sentences that do. Without dictionary
+    words to copy the spelling from, the model does not write them. This accounts
+    for 1.6 points of its error (0.9 for phonemes only) but does not change the order.
+- **Not tested:** a stronger language model or more "thinking", either of which
+  might be able to use the probabilities. Our result is for a small model at low
+  thinking.
+- How the alternatives are built: `b2t/alternatives.py` merges the network's
+  step-by-step probabilities into one slot per sound, with runner-ups above 10%.
+  About 15% of sounds come with a runner-up.
+
+**A finding we did not expect: the Gemini model matters.** The "dictionary
+candidates" row is the same method we scored on Saturday, on the same sentences, and
+we checked the inputs were identical (all 808 phoneme sequences and dictionary
+sentences match Saturday's file). The only difference is the Gemini model:
+
+| Gemini model, same method, same 808 tune sentences | Word error |
+|---|---|
+| Gemini 3.5 Flash Lite (Saturday) | 17.0% |
+| Gemini 3.1 Flash Lite (Sunday) | 14.8% |
+
+Sentence by sentence, 3.1 was better on 125, worse on 44, the same on 639. Some of
+the gap may be run-to-run randomness in the language model; we ran each once.
+
+- Decision (made on tune): TODO. If we switch to 3.1, score val once with
+  `python -m b2t.llm_compare --run runs/run_a --split val --methods candidates
+  --llm-model gemini-3.1-flash-lite` and report it beside Saturday's 23.1%.
+
 ### Graphs (latest versions)
 All made by `python -m b2t.analyze`, which re-draws every graph from the files in
 `results/`. Re-run it whenever new results arrive. Images are in `figures/`.
 
 **More training sentences, lower error, on held-out sentences** (data-amount experiment, val)
 ![Data amount on val](../figures/data_amount_val.png)
+
+**What should the language model be shown?** (three methods, tune)
+![Language model methods](../figures/language_model_methods_tune.png)
 
 **Our model against the simple baseline** (val, 1,426 held-out sentences)
 ![Baseline against our model](../figures/baseline_vs_model.png)

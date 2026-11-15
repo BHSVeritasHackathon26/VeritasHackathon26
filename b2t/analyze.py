@@ -450,6 +450,49 @@ def main():
         ax.set_ylim(0, 90)
         save(fig, "drift.png")
 
+    # ---- What to show the language model: three methods compared ----
+    for path in sorted(RESULTS.glob("llm_compare_*.json")):
+        c = json.loads(path.read_text())
+        def method_error(key, ignore_apostrophes=False):
+            clean = (lambda t: normalize_text(t).replace("'", "")) if ignore_apostrophes else normalize_text
+            edits = sum(edit_distance(clean(r[key]).split(), clean(r["truth"]).split()) for r in c["sentences"])
+            return edits / sum(len(clean(r["truth"]).split()) for r in c["sentences"])
+        labels = {"dictionary": "Dictionary only\n(no language model)",
+                  "candidates": "Dictionary candidates\n(the method we use)",
+                  "phonemes": "Phonemes only",
+                  "alternatives": "Phonemes with\nalternatives and odds"}
+        methods = [m for m in labels if m in c["summary"]]
+        table = {m: {"word_error": c["summary"][m]["word_error_rate"],
+                     "word_error_ignoring_apostrophes": method_error(m, True),
+                     "sentences_all_correct": c["summary"][m]["sentences_all_correct"],
+                     "fell_back_to_dictionary": c["summary"][m]["fell_back_to_dictionary"],
+                     "outputs_with_an_apostrophe": sum("'" in r[m] for r in c["sentences"])}
+                 for m in methods}
+        out[f"language_model_methods_{c['split']}"] = {"llm_model": c["llm_model"], "n_sentences": c["n_sentences"],
+                                                       "methods": table}
+        print(f"\nWhat the language model is shown ({c['split']}, {c['n_sentences']} sentences, {c['llm_model']})")
+        for m in methods:
+            t = table[m]
+            print(f"  {m:13s} word error {t['word_error']:.1%}  (ignoring apostrophes {t['word_error_ignoring_apostrophes']:.1%})  "
+                  f"{t['sentences_all_correct']} fully correct")
+        if len(methods) < 3:
+            continue  # a single-method run (e.g. the final val score) needs no graph
+        where = "tuning" if c["split"] == "tune" else "held-out"
+        fig, ax = new_chart("What should the language model be shown?",
+                            f"Word error on {c['n_sentences']} {where} sentences. Same neural network and "
+                            f"same language model each time.", size=(7.5, 4.0))
+        ax.grid(axis="y", visible=False)
+        ax.grid(axis="x", color=GRID, linewidth=0.8)
+        order = sorted(methods, key=lambda m: -table[m]["word_error"])
+        for i, m in enumerate(order):
+            value = 100 * table[m]["word_error"]
+            ax.barh(i, value, height=0.55, color=MUTED if m == "dictionary" else OURS)
+            ax.text(value + 0.4, i, f"{value:.1f}%", va="center", fontsize=9.5, color=INK)
+        ax.set_yticks(range(len(order)), [labels[m] for m in order])
+        ax.xaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+        ax.set_xlim(0, max(100 * table[m]["word_error"] for m in order) * 1.18)
+        save(fig, f"language_model_methods_{c['split']}.png")
+
     # ---- Candidate examples for the write-up ----
     rng = random.Random(0)
     def example(r):

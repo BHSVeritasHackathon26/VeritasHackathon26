@@ -465,6 +465,40 @@
    }
   }
  },
+ "language_model_methods_tune": {
+  "llm_model": "gemini-3.1-flash-lite",
+  "n_sentences": 808,
+  "methods": {
+   "dictionary": {
+    "word_error": 0.19091089501885294,
+    "word_error_ignoring_apostrophes": 0.18952173050208374,
+    "sentences_all_correct": 290,
+    "fell_back_to_dictionary": 0,
+    "outputs_with_an_apostrophe": 164
+   },
+   "candidates": {
+    "word_error": 0.14784679499900774,
+    "word_error_ignoring_apostrophes": 0.14725143877753522,
+    "sentences_all_correct": 401,
+    "fell_back_to_dictionary": 0,
+    "outputs_with_an_apostrophe": 158
+   },
+   "phonemes": {
+    "word_error": 0.17503472911291923,
+    "word_error_ignoring_apostrophes": 0.16570748164318316,
+    "sentences_all_correct": 385,
+    "fell_back_to_dictionary": 0,
+    "outputs_with_an_apostrophe": 110
+   },
+   "alternatives": {
+    "word_error": 0.21730502083746775,
+    "word_error_ignoring_apostrophes": 0.20123040285770985,
+    "sentences_all_correct": 324,
+    "fell_back_to_dictionary": 0,
+    "outputs_with_an_apostrophe": 53
+   }
+  }
+ },
  "example_candidates": {
   "one_word_wrong": [
    {
