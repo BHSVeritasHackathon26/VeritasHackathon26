@@ -425,6 +425,7 @@ function showSentence(d, maySpeak) {
   const sEl = $('sentence'); sEl.className = 'sentence'; sEl.textContent = d.text || '(empty)';
 
   const chips = $('chips'); chips.textContent = '';
+  if (d.live_ms != null) chips.append(el('span', 'chip g', 'decoded live · ' + Math.round(d.live_ms) + ' ms'));
   chips.append(el('span', 'chip', d.seconds.toFixed(1) + ' s of signal'), el('span', 'chip', d.session),
                el('span', 'chip', 'block ' + d.block + ' · trial ' + d.trial));
   $('axisMid').textContent = 'time · neural recording of ' + d.n_features + ' features × ' + d.steps + ' time steps';
@@ -440,8 +441,12 @@ function showSentence(d, maySpeak) {
   c.append(crow('What they were trying to say', d.truth, 'truth'),
            crow('Phonemes from the model', d.phonemes, 'mono', d.phonemes_wrong, d.phonemes_of, 'phonemes'));
   d.decoders.forEach(x => c.append(crow(x.name, pieces(x.pieces), '', x.wrong, x.of, 'words')));
-  $('note').textContent = 'Highlighted words differ from what they were trying to say; \u23B5 marks a missing word. ' +
-    'These predictions were saved earlier by running our trained model on this recording.';
+  const how = d.live_ms == null
+    ? 'These predictions were saved earlier by running our trained model on this recording.'
+    : 'The phonemes and the dictionary sentence were computed just now by the model on this computer. ' +
+      (d.decoders.length > 1 ? 'The language-model sentence was saved earlier for these same phonemes.'
+                             : 'No saved language-model sentence matches these phonemes.');
+  $('note').textContent = 'Highlighted words differ from what they were trying to say; \u23B5 marks a missing word. ' + how;
 
   $('speakBtn').style.display = $('copyBtn').style.display = '';
   if (maySpeak && $('autoSpeak').checked) speak(d.text); else stopSpeaking();

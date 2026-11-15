@@ -196,7 +196,8 @@ def run_model(features, info, index):
     with PREDICT_LOCK, _no_grad():
         out = model_adapter.predict(STATE["model"], features, info)
     if isinstance(out, dict):
-        return {"text": str(out.get("text", "")).strip(), "phonemes": out.get("phonemes")}
+        return {"text": str(out.get("text", "")).strip(), "phonemes": out.get("phonemes"),
+                "phoneme_list": out.get("phoneme_list")}
     return {"text": str(out).strip()}
 
 
@@ -258,19 +259,38 @@ def explorer_sentence(session: str = "", key: str = ""):
     truth = normalize_text(row["truth"])
     true_words = truth.split()
 
+    # With a model connected, decode this recording now instead of using the saved
+    # prediction. Without one, fall back to what was saved by b2t.evaluate.
+    live_ms = None
+    predicted_phonemes, dictionary_sentence = row["predicted_phonemes"], row["dictionary"]
+    if not STATE["demo"]:
+        t0 = time.perf_counter()
+        out = run_model(trial.features, {"session": session, "block_num": row["block"],
+                                         "trial_num": row["trial"]}, 0)
+        live_ms = round((time.perf_counter() - t0) * 1000, 1)
+        if out.get("phoneme_list") is not None:
+            predicted_phonemes, dictionary_sentence = out["phoneme_list"], out["text"]
+        else:
+            live_ms = None
+    # The saved language-model sentence was made from the saved phonemes, so it
+    # only applies if the live phonemes are identical.
+    llm_sentence = row.get("llm") if predicted_phonemes == row["predicted_phonemes"] else None
+
     def decoder(name, sentence):
         words = sentence.split()
         return {"name": name, "text": sentence, "pieces": mark_words(sentence, truth),
                 "wrong": edit_distance(words, true_words), "of": len(true_words)}
 
-    decoders = [decoder("Dictionary decoder", row["dictionary"])]
-    if row.get("llm") is not None:
-        decoders.append(decoder("Language-model decoder", normalize_text(row["llm"])))
+    decoders = [decoder("Dictionary decoder", dictionary_sentence)]
+    if llm_sentence is not None:
+        decoders.append(decoder("Language-model decoder", normalize_text(llm_sentence)))
     return {
         "session": session, "key": key, "block": row["block"], "trial": row["trial"],
         "truth": truth,
-        "phonemes": " ".join(row["predicted_phonemes"]),
-        "phonemes_wrong": edit_distance(row["predicted_phonemes"], row["true_phonemes"]),
+        "phonemes": " ".join(predicted_phonemes),
+        "phonemes_wrong": edit_distance(predicted_phonemes, row["true_phonemes"]),
+        "live_ms": live_ms,
+        "matches_saved": predicted_phonemes == row["predicted_phonemes"],
         "phonemes_of": len(row["true_phonemes"]),
         "decoders": decoders,
         "text": decoders[-1]["text"],  # what the page shows large and reads aloud
@@ -316,6 +336,7 @@ def decode(file: UploadFile = File(...)):
                             "trial_num": _to_int(g.attrs.get("trial_num"))}
                     t0 = time.perf_counter()
                     out = run_model(features, info, i)
+                    out.pop("phoneme_list", None)  # only the explorer needs the list form
                     msg.update(out, ms=round((time.perf_counter() - t0) * 1000, 1),
                                session=info["session"], block=info["block_num"], trial=info["trial_num"],
                                steps=int(features.shape[0]), preview=make_preview(features))
