@@ -18,7 +18,7 @@ LOG=runs/fractions_log.txt
 
 for FRACTION in 0.10 0.25 0.50 1.00; do
     echo "$(date)  Starting fraction $FRACTION" | tee -a "$LOG"
-    PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python -m b2t.train \
+    PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python -u -m b2t.train \
         --config configs/t15.toml --model gru --out "runs/frac_$FRACTION" \
         --train-fraction "$FRACTION" --batches 40000 --batch-size 32 --eval-every 4000 \
         2>&1 | tee -a "$LOG"
