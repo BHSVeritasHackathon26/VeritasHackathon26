@@ -1,4 +1,4 @@
-# Thought-to-Text
+# NeuroScribe
 **Track:** AI + Languages\
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
