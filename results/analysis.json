@@ -421,6 +421,50 @@
    "best_tune_phoneme_error": 0.1036385745019175
   }
  },
+ "drift": {
+  "summary": [
+   {
+    "n_sentences": 0,
+    "n_sessions": 15,
+    "n_val_trials": 508,
+    "phoneme_error_rate": 0.6328218018256383,
+    "word_error_rate_dictionary": 0.8999428244711264
+   },
+   {
+    "n_sentences": 10,
+    "n_sessions": 15,
+    "n_val_trials": 508,
+    "phoneme_error_rate": 0.46322264849847866,
+    "word_error_rate_dictionary": 0.7104059462550029
+   },
+   {
+    "n_sentences": 50,
+    "n_sessions": 15,
+    "n_val_trials": 508,
+    "phoneme_error_rate": 0.3137319751289853,
+    "word_error_rate_dictionary": 0.5205831903945112
+   }
+  ],
+  "last_training_session": "t15.2023.12.29",
+  "run_a_on_same_sessions": {
+   "sentences": 508,
+   "phoneme_error": 0.18024871014684482,
+   "word_error_dictionary": 0.3158947970268725,
+   "word_error_llm": 0.29130931961120643
+  },
+  "approx_by_period": {
+   "within_3_months": {
+    "0": 0.4914110575125243,
+    "10": 0.367699101661569,
+    "50": 0.28748046053720766
+   },
+   "after_12_months": {
+    "0": 0.7334339425902954,
+    "10": 0.5962843252973532,
+    "50": 0.3964468133282947
+   }
+  }
+ },
  "example_candidates": {
   "one_word_wrong": [
    {
