@@ -66,7 +66,7 @@ Here's an example of our models at work!
 Our trained model with 80,000 batches with all of the training sentences had a PER of 11%.
 
 Here's an example of our model at work!
-Original, intended sentence: the jury and a judge worked together on it
+Original, intended sentence: the jury and a judge work together on it
 Model translation: the jury and a just work together on it
 
 Our drift measurement model produced the graph shown below.
