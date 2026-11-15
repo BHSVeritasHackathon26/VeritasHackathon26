@@ -152,6 +152,23 @@ def _to_int(v):
         return None
 
 
+def target_sentence(g, info):
+    """The sentence the participant was trying to say, if we can find it. Display only: it
+    is never fed to the model. Looks in the file's own label first (some files carry
+    one), then in the saved held-out results the explorer uses. Returns None if neither
+    has it, which is normal for unlabeled test files."""
+    label = _to_str(g.attrs.get("sentence_label"))
+    if not label and "transcription" in g:
+        label = _to_str(g["transcription"][:])
+    if label:
+        return label
+    if EXPLORER is not None:
+        row = EXPLORER["rows"].get(info["session"], {}).get(f"{info['block_num']}-{info['trial_num']}")
+        if row:
+            return row["truth"]
+    return None
+
+
 def find_trials(f):
     """Every group holding an `input_features` dataset is one trial."""
     if "input_features" in f:
@@ -347,6 +364,7 @@ def decode(file: UploadFile = File(...)):
                     out = run_model(features, info, i)
                     out.pop("phoneme_list", None)  # only the explorer needs the list form
                     msg.update(out, ms=round((time.perf_counter() - t0) * 1000, 1),
+                               target=target_sentence(g, info),
                                session=info["session"], block=info["block_num"], trial=info["trial_num"],
                                steps=int(features.shape[0]), preview=make_preview(features))
                 except Exception as e:

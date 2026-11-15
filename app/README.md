@@ -59,8 +59,12 @@ step through them.
 Box 2 shows the `phonemes` that `predict()` returns (a string such as `AY | N OW`, or a
 list; `|` is a word break). If a model returns only a sentence, box 2 says so.
 
-The app is built for the unlabeled test files: it never reads sentence labels and
-has no accuracy scoring.
+When the sentence the participant was trying to say is known, it appears under the
+prediction as a grey **Target sentence**. It comes from the file's own label if it
+has one (`sentence_label` or `transcription`), otherwise from the saved held-out
+results in `results/run_a_val.json` (matched by session, block and trial). Unlabeled
+test files simply show nothing there. The target is for display only: it is never
+given to the model, and there is no accuracy scoring.
 
 ## Browsing the held-out sentences
 
