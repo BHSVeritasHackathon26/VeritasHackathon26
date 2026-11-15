@@ -282,13 +282,21 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
 
 | Run | Training sentences | Best tune phoneme error | Batch where it peaked |
 |---|---|---|---|
-| `frac_0.10` | 729 | 34.5% | TODO |
-| `frac_0.25` | 1,815 | 22.7% | TODO |
-| `frac_0.50` | 3,632 | 16.5% | TODO |
-| `frac_1.00` | 7,264 | 13.2% | TODO |
+| `frac_0.10` | 729 | 34.5% | 36,000 |
+| `frac_0.25` | 1,815 | 22.7% | 36,000 |
+| `frac_0.50` | 3,632 | 16.5% | 40,000 |
+| `frac_1.00` | 7,264 | 13.2% | 40,000 |
 
-Results in (Sun morning), read from the terminal; to be confirmed against the
-`run.json` files once they are pushed.
+Tune word error with the dictionary decoder (no language model), same four runs:
+53.2%, 37.8%, 28.8%, 23.7%. Graphs: `figures/data_amount.png` and
+`figures/training_by_data_amount.png`.
+
+Results confirmed against the pushed `run.json` files (Sun morning).
+- The 10% run had finished learning by about 20,000 batches (34.9% then, 34.5% at
+  the end). The 100% run was still improving at 40,000 (15.1% at 20,000, 13.2% at
+  the end). The more data there is, the longer it is worth training.
+- Also scored on val on Sunday (dictionary decoder only) as a description of the
+  experiment, not to choose anything. Val results: TODO.
 - Every doubling of data still helps, by a shrinking amount: 10% -> 25% cut error by
   11.8 points, 25% -> 50% by 6.2, 50% -> 100% by 3.3. The curve has not flattened, so
   more recording from this participant would probably still improve the model.
@@ -320,10 +328,14 @@ learning-rate schedule.
 | Batches (batch size 32) | Best tune phoneme error | Run |
 |---|---|---|
 | 40,000 | 13.2% | `frac_1.00` |
-| 80,000 | TODO | started early Sun morning |
+| 80,000 | 11.0% | `frac_1_80k` (record saved as `results/run_a_80k_run.json`) |
 | 120,000 | 10.4% | `run_a` (our final model) |
 
-### Drift experiment (planned Sun morning; replaces the dropped calibration idea)
+- Doubling training from 40,000 to 80,000 batches cut error by 2.2 points; the next
+  40,000 cut it by only 0.6. Most of the benefit of longer training is in by 80,000.
+- Graph: `figures/training_length.png`.
+
+### Drift experiment (started Sun about 10:30 AM; replaces the dropped calibration idea)
 Question: how fast does accuracy fall as time passes after training, and does a
 quick recalibration bring it back? In practice: how often would a user need to
 recalibrate, and how much would it take?
@@ -438,8 +450,8 @@ recalibrate, and how much would it take?
 - [ ] Morning: copy the four `runs/frac_*/run.json` files into `results/`, re-run
       the audit, push
 - [x] Data-amount results recorded (34.5 / 22.7 / 16.5 / 13.2%)
-- [ ] Make the data-amount graph
-- [ ] Record the 80,000-batch run's result
+- [x] Data-amount graph made; 80,000-batch result recorded (11.0%)
+- [ ] Record the data-amount runs' val scores
 - [ ] Train the drift model (`runs/drift`), run `b2t.drift`, record results, make the graph
 - [x] Final model: Run A (short). Val scored Sat night
 - [ ] Breakdowns and graphs (see questions below)
@@ -467,6 +479,33 @@ does not separate the two).
   Not yet measured; the per-type breakdown of `results/run_a_val.json` will show it.
 - Random-word and Harvard samples in val will be small (a few dozen sentences
   each), so those per-type numbers will be noisy.
+
+### Graphs (latest versions)
+All made by `python -m b2t.analyze`, which re-draws every graph from the files in
+`results/`. Re-run it whenever new results arrive. Images are in `figures/`.
+
+**Our model against the simple baseline** (val, 1,426 held-out sentences)
+![Baseline against our model](../figures/baseline_vs_model.png)
+
+**More training sentences, lower error** (data-amount experiment, tune)
+![Data amount](../figures/data_amount.png)
+
+**Less data is used up sooner** (the same four runs, during training)
+![Training by data amount](../figures/training_by_data_amount.png)
+
+**Training for longer** (same model and data; 40,000 / 80,000 / 120,000 batches, tune)
+![Training length](../figures/training_length.png)
+
+**How the final model improved during training** (Run A, tune)
+![Training curve](../figures/training_curve.png)
+
+**Error by kind of sentence** (Run A, val)
+![Error by sentence type](../figures/error_by_sentence_type.png)
+
+**Error by sentence length** (Run A, val)
+![Error by sentence length](../figures/error_by_sentence_length.png)
+
+Still to come: `figures/drift.png`, once the drift experiment has run.
 
 ### Analysis of Run A on val (Sun morning)
 From `python -m b2t.analyze`, which reads the saved predictions and writes graphs to
