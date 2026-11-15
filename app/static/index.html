@@ -4,32 +4,57 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Thought-to-Text</title>
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('t2t.theme'); } catch (e) {}
+    if (t !== 'dark' && t !== 'light') t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', t);
+  })();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='9' fill='%235b9bf0'/%3E%3Cg stroke='%235b9bf0' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M20 3v6M20 31v6M3 20h6M31 20h6M8 8l4 4M28 28l4 4M32 8l-4 4M12 28l-4 4'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --navy: #1e2a47; --blue: #5b9bf0; --pale: #e4eefc; --card: #ffffff; --bg: #ffffff;
-    --edge: #dfe8f6; --mute: #6f83ab; --green: #22b573; --bad: #d94b58;
+    color-scheme: light;
+    --text: #1e2a47; --ink: #1e2a47; --on-ink: #ffffff;
+    --blue: #5b9bf0; --pale: #e4eefc; --card: #ffffff; --bg: #ffffff; --surface: #ffffff;
+    --edge: #dfe8f6; --mute: #6f83ab; --green: #22b573; --bad: #d94b58; --placeholder: #9fb0cf;
+    --drop-bg: #f7faff; --drop-bd: #b4cdf2; --drop-hover: #f0f6ff; --drop-over: #e6f0ff;
+    --shadow: 0 1px 2px rgba(30,42,71,.04), 0 8px 24px -12px rgba(30,42,71,.14);
+    --glow: 0 0 0 5px rgba(91,155,240,.14), 0 8px 24px -12px rgba(30,42,71,.18);
     --head: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
     --body: "Open Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --text: #e8eefc; --ink: #2f4070; --on-ink: #ffffff;
+    --blue: #6aa8ff; --pale: #22305a; --card: #162038; --bg: #0d1325; --surface: #1d2846;
+    --edge: #2b3862; --mute: #93a4c9; --green: #2ccb85; --bad: #ff7f8b; --placeholder: #62749c;
+    --drop-bg: #111a30; --drop-bd: #36497a; --drop-hover: #18233f; --drop-over: #1e2d55;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px -14px rgba(0,0,0,.65);
+    --glow: 0 0 0 5px rgba(106,168,255,.2), 0 10px 28px -14px rgba(0,0,0,.65);
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  body { background: var(--bg); color: var(--navy); font-family: var(--body); min-height: 100vh; }
+  body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; transition: background .25s, color .25s; }
   .wrap { max-width: 760px; margin: 0 auto; padding: 32px 24px 56px; }
   .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .theme { margin-left: auto; width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--edge); background: var(--surface); display: grid; place-items: center; padding: 0; transition: border-color .15s, background .25s; }
+  .theme:hover { border-color: var(--blue); }
+  .brand .theme svg { width: 20px; height: 20px; display: block; }   /* beats `.brand svg` (the 44px logo rule) */
   .brand svg { width: 44px; height: 44px; flex: none; }
   .brand b { font: 700 18px var(--head); letter-spacing: -.005em; }
   h1 { font: 700 clamp(34px, 6.4vw, 52px)/1.08 var(--head); margin: 0 0 30px; letter-spacing: -.02em; }
   button { font: inherit; color: inherit; cursor: pointer; }
 
   /* the three boxes */
-  .card { background: var(--card); border: 2px solid var(--edge); border-radius: 22px; overflow: hidden; transition: border-color .2s, box-shadow .2s;
-    box-shadow: 0 1px 2px rgba(30,42,71,.04), 0 8px 24px -12px rgba(30,42,71,.14); }
-  .card.active { border-color: var(--blue); box-shadow: 0 0 0 5px rgba(91,155,240,.14), 0 8px 24px -12px rgba(30,42,71,.18); }
+  .card { background: var(--card); border: 2px solid var(--edge); border-radius: 22px; overflow: hidden; transition: border-color .2s, box-shadow .2s, background .25s;
+    box-shadow: var(--shadow); }
+  .card.active { border-color: var(--blue); box-shadow: var(--glow); }
   .card header { display: flex; align-items: center; gap: 12px; padding: 18px 24px 0; }
-  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--navy); color: #fff; font: 600 14px var(--head);
+  .num { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--on-ink); font: 600 14px var(--head);
     display: grid; place-items: center; flex: none; }
   .card.done .num { background: var(--green); }
   h2 { font: 600 19px var(--head); margin: 0; letter-spacing: -.005em; }
@@ -39,12 +64,12 @@
   .arrow svg { width: 22px; height: 22px; }
 
   /* 1 · input */
-  .drop { border: 2px dashed #b4cdf2; border-radius: 16px; padding: 30px 20px 32px; text-align: center; cursor: pointer;
-    transition: .15s; outline: none; background: #f7faff; }
+  .drop { border: 2px dashed var(--drop-bd); border-radius: 16px; padding: 30px 20px 32px; text-align: center; cursor: pointer;
+    transition: .15s; outline: none; background: var(--drop-bg); }
   .drop .ico { width: 44px; height: 44px; margin: 0 auto 12px; border-radius: 14px; background: var(--pale); color: var(--blue); display: grid; place-items: center; }
   .drop .ico svg { width: 24px; height: 24px; }
-  .drop:hover, .drop:focus-visible { border-color: var(--blue); background: #f0f6ff; }
-  .drop.over { border-color: var(--blue); background: #e6f0ff; border-style: solid; }
+  .drop:hover, .drop:focus-visible { border-color: var(--blue); background: var(--drop-hover); }
+  .drop.over { border-color: var(--blue); background: var(--drop-over); border-style: solid; }
   .drop b { display: block; font: 600 18px var(--head); margin-bottom: 4px; }
   .drop small { color: var(--mute); font-size: 14px; }
   .file { display: none; align-items: center; gap: 12px; }
@@ -55,30 +80,49 @@
   .bar { height: 4px; background: var(--pale); border-radius: 4px; overflow: hidden; margin-top: 12px; opacity: 0; transition: opacity .2s; }
   .busy .bar { opacity: 1; }
   .bar i { display: block; height: 100%; width: 0; background: var(--blue); transition: width .15s; }
-  .btn { border: 2px solid var(--edge); background: #fff; border-radius: 12px; padding: 7px 14px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+  .btn { border: 2px solid var(--edge); background: var(--surface); border-radius: 12px; padding: 7px 14px; font-weight: 600; font-size: 14px; white-space: nowrap; }
   .btn:hover { border-color: var(--blue); }
   .nav { display: none; align-items: center; gap: 6px; }
-  .nav button { width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--edge); background: #fff; font-size: 16px; line-height: 1; padding: 0; }
+  .nav button { width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--edge); background: var(--surface); font-size: 16px; line-height: 1; padding: 0; }
   .nav button:hover:not(:disabled) { border-color: var(--blue); } .nav button:disabled { opacity: .35; cursor: default; }
   .nav span { min-width: 74px; text-align: center; font-size: 14px; color: var(--mute); font-weight: 600; }
 
   /* 2 · phonemes */
   .phonemes { display: flex; flex-wrap: wrap; gap: 8px 6px; min-height: 44px; align-content: flex-start; }
-  .ph { background: var(--navy); color: #fff; font: 700 15px var(--body); padding: 8px 12px; border-radius: 10px; animation: pop .22s ease-out backwards; }
+  .ph { background: var(--ink); color: var(--on-ink); font: 700 15px var(--body); padding: 8px 12px; border-radius: 10px; animation: pop .22s ease-out backwards; }
   .gap { width: 14px; }
-  .placeholder { color: #9fb0cf; font-size: 16px; }
+  .placeholder { color: var(--placeholder); font-size: 16px; }
   .note { color: var(--mute); font-size: 14px; }
 
   /* 3 · sentence */
   .sentence { font: 600 clamp(24px, 4.4vw, 32px)/1.3 var(--head); letter-spacing: -.01em; min-height: 44px; overflow-wrap: anywhere; animation: fade .25s ease-out; }
+  .attempt { margin-bottom: 18px; }
+  .attempt .body { padding: 18px 24px 20px; }
+  .alabel { font: 700 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); margin-bottom: 6px; }
+  .alabel small { font: 400 13px var(--body); letter-spacing: 0; text-transform: none; margin-left: 6px; }
+  .atext { font: 600 clamp(20px, 3.8vw, 26px)/1.35 var(--head); overflow-wrap: anywhere; animation: fade .25s ease-out; }
+  .atext.note { font: 400 15px/1.45 var(--body); color: var(--mute); }
+  .atext::first-letter { text-transform: uppercase; }
+  .model { margin-top: 14px; font-size: 14px; color: var(--mute); }
+  .model b { color: var(--text); font-weight: 700; }
+  .stage { animation: fade .25s ease-out backwards; }
+  .stage + .mini + .stage { animation-delay: .22s; }
+  .stlabel { font: 700 12px var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); margin-bottom: 4px; }
+  .stlabel small { font: 400 13px var(--body); letter-spacing: 0; text-transform: none; margin-left: 6px; }
+  .stext { font: 600 clamp(18px, 3.4vw, 22px)/1.35 var(--head); overflow-wrap: anywhere; min-height: 30px; }
+  .stext.note { font: 400 15px/1.45 var(--body); color: var(--mute); }
+  .mini { display: grid; place-items: center; height: 30px; color: var(--blue); }
+  .mini svg { width: 18px; height: 18px; }
+  .sentence::first-letter { text-transform: uppercase; }
   .sentence.err { font: 600 15px var(--body); color: var(--bad); }
-  .speak { border: 2px solid var(--edge); background: #fff; border-radius: 12px; width: 38px; height: 38px; display: none; place-items: center; padding: 0; }
+  .speak { border: 2px solid var(--edge); background: var(--surface); border-radius: 12px; width: 38px; height: 38px; display: none; place-items: center; padding: 0; }
   .speak:hover { border-color: var(--blue); } .speak.on { border-color: var(--blue); background: var(--pale); }
   .speak svg { width: 20px; height: 20px; }
   .demo { margin-top: 22px; text-align: center; font-size: 13px; color: var(--mute); display: none; }
   .demo.show { display: block; } .demo.err { color: var(--bad); }
   @keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.9); } }
   @keyframes fade { from { opacity: 0; } }
+  @media (max-width: 480px) { #finalSrc { display: none; } }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
@@ -93,8 +137,13 @@
         <path d="M22 9v4M22 31v4M9 22h4M31 22h4" opacity=".55"/></g>
       <circle cx="22" cy="22" r="11" fill="url(#lg)"/></svg>
     <b>Thought-to-Text</b>
+    <button class="theme" id="themeBtn" type="button"></button>
   </div>
   <h1>Try it live</h1>
+
+  <section class="card attempt" id="attempt" hidden>
+    <div class="body"><div class="alabel">Attempted sentence<small>what the participant was trying to say</small></div><div class="atext" id="attemptText"></div></div>
+  </section>
 
   <section class="card active" id="c1">
     <header><span class="num">1</span><h2>Input</h2>
@@ -117,16 +166,25 @@
 
   <section class="card" id="c2">
     <header><span class="num">2</span><h2>Phonemes</h2><div class="side">the sounds the model decoded</div></header>
-    <div class="body"><div class="phonemes" id="phonemes"><span class="placeholder">Waiting for a file…</span></div></div>
+    <div class="body"><div class="phonemes" id="phonemes"><span class="placeholder">Waiting for a file…</span></div>
+      <div class="model" id="modelLine"></div></div>
   </section>
 
   <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg></div>
 
   <section class="card" id="c3">
-    <header><span class="num">3</span><h2>Sentence</h2>
-      <div class="side"><button class="speak" id="speak" aria-label="Read aloud" title="Read aloud"></button></div>
+    <header><span class="num">3</span><h2>Words</h2><div class="side">from sounds to a sentence</div></header>
+    <div class="body" id="words"></div>
+  </section>
+
+  <div class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg></div>
+
+  <section class="card" id="c4">
+    <header><span class="num">4</span><h2>Sentence</h2>
+      <div class="side"><span id="finalSrc"></span><button class="speak" id="speak" aria-label="Read aloud" title="Read aloud"></button></div>
     </header>
-    <div class="body"><div class="sentence" id="sentence"><span class="placeholder" style="font:400 16px var(--body)">Waiting for a file…</span></div></div>
+    <div class="body"><div class="sentence" id="sentence"><span class="placeholder" style="font:400 16px var(--body)">Waiting for a file…</span></div>
+    </div>
   </section>
 
   <div class="demo" id="demo"></div>
@@ -134,12 +192,13 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const S = { results: [], sel: -1, total: 0, xhr: null };
+const S = { results: [], sel: -1, total: 0, xhr: null, status: null };
 
 /* ---------- is the real model connected? ---------- */
 (async function status() {
   try {
     const s = await (await fetch('/api/status', { cache: 'no-store' })).json(), d = $('demo');
+    S.status = s; setModelLine(s); showWords(S.results[S.sel] || null);
     if (s.load_error) { d.textContent = 'The model failed to load. See the server terminal for the error.'; d.className = 'demo show err'; }
     else if (s.demo) { d.textContent = 'Demo mode: no model connected yet, so these are placeholder results.'; d.className = 'demo show'; }
     else d.className = 'demo';
@@ -164,7 +223,7 @@ function decodeFile(file) {
   $('nav').style.display = 'none';
   $('inBody').classList.add('loaded', 'busy');
   $('fname').textContent = file.name; $('fsub').textContent = 'Uploading…'; $('barFill').style.width = '0%';
-  setStage(1); showPhonemes(null); showSentence(null);
+  setStage(1); showTarget(null); showPhonemes(null); showWords(null); showSentence(null);
 
   const xhr = S.xhr = new XMLHttpRequest(), form = new FormData(); form.append('file', file);
   let seen = 0;
@@ -202,19 +261,24 @@ function finish() {
 }
 function fail(msg) {
   S.xhr = null; $('inBody').classList.remove('loaded', 'busy');
-  showPhonemes(null); showSentence({ error: msg }); setStage(0);
+  showTarget(null); showPhonemes(null); showWords(null); showSentence({ error: msg }); setStage(0);
 }
 
 /* ---------- the three boxes ---------- */
 function select(i) {
   const r = S.results[i]; if (!r) return;
   S.sel = i; updateNav();
-  if (r.error) { showPhonemes(null, 'No phonemes for this one.'); showSentence(r); setStage(1); return; }
+  clearTimeout(select.t);
+  showTarget(r);
+  if (r.error) { showPhonemes(null, 'No phonemes for this one.'); showWords(null); showSentence(r); setStage(1); return; }
   const ph = toList(r.phonemes);
   setStage(2); showPhonemes(ph, ph ? null : 'This model did not return phonemes.');
-  const delay = ph ? Math.min(450, ph.length * 14 + 120) : 0;      // let the phonemes land, then the sentence
-  clearTimeout(select.t);
-  select.t = setTimeout(() => { if (S.sel !== i) return; setStage(3); showSentence(r); speak(r.text); }, delay);
+  showWords(null); showSentence(null);
+  const delay = ph ? Math.min(450, ph.length * 14 + 120) : 0;      // phonemes land, then the words, then the sentence
+  select.t = setTimeout(() => {
+    if (S.sel !== i) return; setStage(3); showWords(r);
+    select.t = setTimeout(() => { if (S.sel !== i) return; setStage(4); showSentence(r); speak(r.text); }, 520);
+  }, delay);
 }
 const toList = p => p == null ? null : (Array.isArray(p) ? p : String(p).split(/\s+/)).filter(Boolean).map(t => /^(sil|<sil>)$/i.test(t) ? '|' : t);
 function showPhonemes(list, note) {
@@ -225,7 +289,40 @@ function showPhonemes(list, note) {
     const s = document.createElement('span'); s.className = 'ph'; s.textContent = p; s.style.animationDelay = Math.min(k * 12, 400) + 'ms'; el.append(s);
   });
 }
+function setModelLine(s) {
+  const el = $('modelLine'); el.textContent = '';
+  if (!s) return;
+  const b = document.createElement('b'); b.textContent = 'Model: ';
+  el.append(b, s.demo ? 'none connected yet (demo mode)' : (s.model_name || 'trained model'));
+}
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg>';
+function stageBlock(label, hint, text, note) {
+  const d = document.createElement('div'); d.className = 'stage';
+  const l = document.createElement('div'); l.className = 'stlabel'; l.textContent = label;
+  if (hint) { const h = document.createElement('small'); h.textContent = hint; l.append(h); }
+  const t = document.createElement('div'); t.className = 'stext' + (text ? '' : ' note'); t.textContent = text || note;
+  d.append(l, t); return d;
+}
+function showWords(r) {           // box 3: the dictionary's words, then the language model's
+  const el = $('words'); el.textContent = '';
+  if (!r || r.error) { const t = document.createElement('div'); t.className = 'stext note'; t.textContent = 'Waiting for a file…'; el.append(t); return; }
+  const lm = S.status && S.status.llm_model ? 'Gemini · ' + S.status.llm_model : 'Gemini';
+  const notes = { differs: 'Not shown: this recording decoded to different phonemes than the saved language-model run, so that saved result does not apply.',
+                  unsaved: 'Not run for this file. Language-model results are only saved for the held-out sentences.' };
+  const mini = document.createElement('div'); mini.className = 'mini'; mini.innerHTML = ARROW;
+  el.append(stageBlock('After the dictionary', 'each group of sounds becomes the closest real word', r.dictionary != null ? r.dictionary : r.text, '(empty)'),
+            mini, stageBlock('After the language model', lm, r.llm, notes[r.llm_status] || notes.unsaved));
+}
+function showTarget(r) {          // the attempted sentence, at the top of the page
+  const card = $('attempt'), el = $('attemptText');
+  card.hidden = !(r && !r.error);
+  if (card.hidden) return;
+  el.className = r.target ? 'atext' : 'atext note';
+  el.textContent = r.target || 'Not available for this file.';
+  el.style.animation = 'none'; el.offsetWidth; el.style.animation = '';
+}
 function showSentence(r) {
+  $('finalSrc').textContent = r && !r.error && r.final_source ? 'from the ' + r.final_source : '';
   const el = $('sentence'); el.className = 'sentence'; el.textContent = '';
   $('speak').style.display = r && !r.error ? 'grid' : 'none';
   if (!r) { const s = document.createElement('span'); s.className = 'placeholder'; s.style.font = '400 16px var(--body)'; s.textContent = 'Waiting for a file…'; el.append(s); return; }
@@ -233,7 +330,7 @@ function showSentence(r) {
   el.textContent = r.text || '(empty)';
 }
 function setStage(n) {      // highlight the box that is working / just finished
-  ['c1', 'c2', 'c3'].forEach((id, k) => { $(id).classList.toggle('active', k === Math.max(0, n - 1)); $(id).classList.toggle('done', k < n - 1 || (n === 3 && k === 2)); });
+  ['c1', 'c2', 'c3', 'c4'].forEach((id, k) => { $(id).classList.toggle('active', k === Math.max(0, n - 1)); $(id).classList.toggle('done', k < n - 1 || (n === 4 && k === 3)); });
   $('c1').classList.toggle('done', n >= 2);
 }
 
@@ -266,6 +363,19 @@ function speak(text) {
 }
 function stopSpeaking() { if (canSpeak) { speechSynthesis.cancel(); $('speak').classList.remove('on'); } }
 $('speak').addEventListener('click', () => { if ($('speak').classList.contains('on')) stopSpeaking(); else { const r = S.results[S.sel]; if (r) speak(r.text); } });
+showWords(null);
+
+/* ---------- light / dark ---------- */
+const SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>';
+function applyTheme(t, save) {
+  document.documentElement.setAttribute('data-theme', t);
+  const b = $('themeBtn'), label = t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  b.innerHTML = t === 'dark' ? SUN : MOON; b.setAttribute('aria-label', label); b.title = label;
+  if (save) { try { localStorage.setItem('t2t.theme', t); } catch (e) {} }
+}
+applyTheme(document.documentElement.getAttribute('data-theme') || 'light', false);
+$('themeBtn').addEventListener('click', () => applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true));
 </script>
 </body>
 </html>

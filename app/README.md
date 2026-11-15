@@ -45,22 +45,42 @@ Anyone with a link can use the app, so stop the server when you are done.
 
 ## 3. Use it
 
-The front page is three boxes, top to bottom, one per stage:
+The front page is a stack of boxes, one per stage. At the very top, above everything, is the
+**Attempted sentence** (what the participant was trying to say) whenever it is known; for files
+that don't include it, it says "Not available for this file."
 
 1. **Input**: drag a `.hdf5` file onto the page (or click the box to browse).
-2. **Phonemes**: the sounds the model decoded, as a row of pills (gaps = word breaks).
-3. **Sentence**: the sentence those sounds turn into, read aloud automatically.
-   The speaker button replays it.
+2. **Phonemes**: the sounds the model decoded, as a row of pills (gaps = word breaks),
+   with the name of the model underneath (`MODEL_NAME` in `model_adapter.py`).
+3. **Words**: what happens between the sounds and the sentence:
+   - **After the dictionary**: each group of sounds becomes the closest real word.
+     This runs live for every file.
+   - **After the language model**: Gemini picks the most sensible words in context.
+4. **Sentence**: the final sentence, read aloud automatically (the speaker button replays it).
+
+The sun/moon button in the top-right corner switches between light and dark mode. It starts in
+whichever your computer uses and remembers your choice.
 
 A file holds many sentences. The first one shows right away and the rest keep
 decoding behind it; use the ‹ › buttons (or the arrow keys) in the Input box to
 step through them.
 
 Box 2 shows the `phonemes` that `predict()` returns (a string such as `AY | N OW`, or a
-list; `|` is a word break). If a model returns only a sentence, box 2 says so.
+list; `|` is a word break). The dictionary sentence is the `text` that `predict()` returns.
 
-The app is built for the unlabeled test files: it never reads sentence labels and
-has no accuracy scoring.
+The language-model step is **not run live**: it needs a Gemini API key and internet, so
+`model_adapter.py` skips it. Instead the page shows the sentence saved for that recording in
+`results/run_a_val.json` (the held-out sentences), but only when this recording's phonemes
+are identical to the saved ones. Any other file, such as a brand-new test file, shows
+"Not run for this file" in that row, and the final sentence is the dictionary sentence
+(the box says which one it is).
+
+When the sentence the participant was trying to say is known, it appears at the top
+of the page as the **Attempted sentence**. It comes from the file's own label if it
+has one (`sentence_label` or `transcription`), otherwise from the saved held-out
+results in `results/run_a_val.json` (matched by session, block and trial). Unlabeled
+test files simply show nothing there. The target is for display only: it is never
+given to the model, and there is no accuracy scoring.
 
 ## Browsing the held-out sentences
 

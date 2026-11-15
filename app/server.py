@@ -152,6 +152,50 @@ def _to_int(v):
         return None
 
 
+def target_sentence(g, info):
+    """The sentence the participant was trying to say, if we can find it. Display only: it
+    is never fed to the model. Looks in the file's own label first (some files carry
+    one), then in the saved held-out results the explorer uses. Returns None if neither
+    has it, which is normal for unlabeled test files."""
+    label = _to_str(g.attrs.get("sentence_label"))
+    if not label and "transcription" in g:
+        label = _to_str(g["transcription"][:])
+    if label:
+        return label
+    row = saved_row(info)
+    return row["truth"] if row else None
+
+
+def saved_row(info):
+    """The saved held-out result (from b2t.evaluate) for this session/block/trial, or None."""
+    if EXPLORER is None:
+        return None
+    return EXPLORER["rows"].get(info["session"], {}).get(f"{info['block_num']}-{info['trial_num']}")
+
+
+def word_stages(out, phoneme_list, info):
+    """What happens between the phonemes and the final sentence.
+
+    dictionary: the dictionary decoder's sentence. Runs live for every file.
+    llm: the language-model (Gemini) sentence. It is not run live here (it needs an API key
+         and internet), so it comes from the saved held-out results, and only when this
+         recording's phonemes are identical to the saved ones.
+    Display only; nothing here goes back to the model."""
+    dictionary = (out.get("text") or "").strip()
+    if STATE["demo"]:
+        llm, status = out.get("llm"), "ok"
+    else:
+        row = saved_row(info)
+        if row is None:
+            llm, status = None, "unsaved"
+        elif phoneme_list is not None and list(phoneme_list) == row["predicted_phonemes"]:
+            llm, status = row.get("llm"), "ok" if row.get("llm") else "unsaved"
+        else:
+            llm, status = None, "differs"
+    return {"dictionary": dictionary, "llm": llm, "llm_status": status,
+            "text": llm or dictionary, "final_source": "language model" if llm else "dictionary"}
+
+
 def find_trials(f):
     """Every group holding an `input_features` dataset is one trial."""
     if "input_features" in f:
@@ -184,9 +228,9 @@ def make_preview(x, rows=32, cols=120):  # the explorer asks for a finer one
 
 
 # Placeholder output for demo mode (no model connected). Phonemes are ARPAbet, "|" = word break.
-DEMO = [("This is a placeholder sentence", "DH IH S | IH Z | AH | P L EY S HH OW L D ER | S EH N T AH N S"),
-        ("The model is not connected yet", "DH AH | M AA D AH L | IH Z | N AA T | K AH N EH K T AH D | Y EH T"),
-        ("Real predictions will appear here", "R IY L | P R IH D IH K SH AH N Z | W IH L | AH P IH R | HH IH R")]
+DEMO = [("this is a place holder sentence", "DH IH S | IH Z | AH | P L EY S HH OW L D ER | S EH N T AH N S", "this is a placeholder sentence"),
+        ("the model is not connect it yet", "DH AH | M AA D AH L | IH Z | N AA T | K AH N EH K T AH D | Y EH T", "the model is not connected yet"),
+        ("real predict shins will appear here", "R IY L | P R IH D IH K SH AH N Z | W IH L | AH P IH R | HH IH R", "real predictions will appear here")]
 
 
 def run_model(features, info, index):
@@ -194,8 +238,8 @@ def run_model(features, info, index):
     and no label reading anywhere in it, and gradients are switched off below."""
     if STATE["demo"]:
         time.sleep(0.12)  # so the demo feels like real decoding
-        text, phonemes = DEMO[index % len(DEMO)]
-        return {"text": text, "phonemes": phonemes}
+        text, phonemes, llm = DEMO[index % len(DEMO)]
+        return {"text": text, "phonemes": phonemes, "llm": llm}
     with PREDICT_LOCK, _no_grad():
         out = model_adapter.predict(STATE["model"], features, info)
     if isinstance(out, dict):
@@ -231,7 +275,8 @@ def explorer_page():
 @app.get("/api/status")
 def status():
     return {"ok": True, "demo": STATE["demo"], "model_name": model_adapter.MODEL_NAME,
-            "load_error": STATE["error"], "explorer": EXPLORER is not None}
+            "load_error": STATE["error"], "explorer": EXPLORER is not None,
+            "llm_model": EXPLORER["llm_model"] if EXPLORER else None}
 
 
 @app.get("/api/explorer")
@@ -345,8 +390,9 @@ def decode(file: UploadFile = File(...)):
                             "trial_num": _to_int(g.attrs.get("trial_num"))}
                     t0 = time.perf_counter()
                     out = run_model(features, info, i)
-                    out.pop("phoneme_list", None)  # only the explorer needs the list form
+                    phoneme_list = out.pop("phoneme_list", None)  # list form, used for the saved-result check
                     msg.update(out, ms=round((time.perf_counter() - t0) * 1000, 1),
+                               target=target_sentence(g, info), **word_stages(out, phoneme_list, info),
                                session=info["session"], block=info["block_num"], trial=info["trial_num"],
                                steps=int(features.shape[0]), preview=make_preview(features))
                 except Exception as e:
