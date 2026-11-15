@@ -70,7 +70,7 @@ list; `|` is a word break). The dictionary sentence is the `text` that `predict(
 
 The language-model step is **not run live**: it needs a Gemini API key and internet, so
 `model_adapter.py` skips it. Instead the page shows the sentence saved for that recording in
-`results/run_a_val.json` (the held-out sentences), but only when this recording's phonemes
+`results/run_a_val_gemini31.json` (the held-out sentences), but only when this recording's phonemes
 are identical to the saved ones. Any other file, such as a brand-new test file, shows
 "Not run for this file" in that row, and the final sentence is the dictionary sentence
 (the box says which one it is).
@@ -78,13 +78,13 @@ are identical to the saved ones. Any other file, such as a brand-new test file, 
 When the sentence the participant was trying to say is known, it appears at the top
 of the page as the **Attempted sentence**. It comes from the file's own label if it
 has one (`sentence_label` or `transcription`), otherwise from the saved held-out
-results in `results/run_a_val.json` (matched by session, block and trial). Unlabeled
+results in `results/run_a_val_gemini31.json` (matched by session, block and trial). Unlabeled
 test files simply show nothing there. The target is for display only: it is never
 given to the model, and there is no accuracy scoring.
 
 ## Browsing the held-out sentences
 
-When the repo's `results/run_a_val.json` and the `hdf5_data_final/` data folder are
+When the repo's `results/run_a_val_gemini31.json` and the `hdf5_data_final/` data folder are
 present, the explorer page at `/explorer` (for example http://localhost:8000/explorer) lets you
 browse the 1,426 held-out (val) sentences: pick a session and sentence, or press **Random sentence**. For each one
 it shows the neural recording, what the participant was trying to say, the phonemes

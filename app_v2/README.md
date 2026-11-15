@@ -62,7 +62,7 @@ the model finishes them. Click a row (or use ↑ / ↓) to show it large and hea
 
 ## Browsing the held-out sentences
 
-When the repo's `results/run_a_val.json` and the `hdf5_data_final/` data folder are
+When the repo's `results/run_a_val_gemini31.json` and the `hdf5_data_final/` data folder are
 present, the top of the page also lets you browse the 1,426 held-out (val)
 sentences: pick a session and sentence, or press **Random sentence**. For each one
 it shows the neural recording, what the participant was trying to say, the phonemes

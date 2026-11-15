@@ -47,7 +47,13 @@ PORT = int(os.environ.get("PORT", "8000"))
 # this works on a computer that does not have the trained model.
 # ---------------------------------------------------------------------------
 EXPLORER = None  # filled in at start-up if the results file and data are present
-EXPLORER_RESULTS = REPO / "results" / "run_a_val.json"
+# The official held-out results: language-model sentences from Gemini 3.1 Flash Lite,
+# the Gemini model we chose on the tune split. If that file is missing, fall back to
+# Saturday's file, which has the same phonemes with Gemini 3.5 Flash Lite sentences.
+EXPLORER_RESULTS = next(
+    (p for p in (REPO / "results" / "run_a_val_gemini31.json", REPO / "results" / "run_a_val.json")
+     if p.exists()),
+    REPO / "results" / "run_a_val.json")
 EXPLORER_CONFIG = REPO / "configs" / "t15.toml"
 
 
