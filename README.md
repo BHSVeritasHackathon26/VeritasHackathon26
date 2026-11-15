@@ -24,24 +24,49 @@ Those sounds are processed as phomenes, which we then converted into English tex
 The full process can be seen in Figure 1.
 
 ## Process
-First, we trained a very basic and rudimentary linear model in about 20 minutes to set a baseline for our prediction. Next, we trained a more advanced model with more data, which took about 5 and a half hours. This model did XXX better than the linear model in addition to having a larger dataset to train on. After that, we trained a very similar model with even more data (all the data we had). This took around X hours to train, which ran over Saturday night. Even across days, people might have differing patterns in neural signals, and our model has to be able to adapt to that. For this, we trained one final model, leaving out 6 random days (out of 45 total days of data) from the training to see how the model would adapt to a new day.
+For the data, we split it into four parts, each with different roles:
+- First was the `train` set, with 7,264 sentences that the model learned from
+- Next was the `tune` set, with 808 sentences that 
+- After that was the `val` set with 1,426 sentences, used to evaluate the model
+- Finally, there was the `test` set, which contained 1,450 sentences with no labels for demo inputs only.
+
+All results from these models are shown in [Results](#Results)
+
+First, we trained a very basic and rudimentary linear model in about 20 minutes (5,000 batches) to set a baseline for our prediction. Next, we trained a more advanced model with more data, which took about 5.5 hours (running 120,000 total batches). This model used 5 layers as opposed to the linear models 1 layer, as well has using 44.4M parameters to the linear model's 293k. These upgrades were in addition to having a larger dataset to train on and training for longer. We did try to train the second model with 60,000 batches with a batch size of 64, but our machine ran out of memory, so we used 120,000 batches with a batch size of 32.
+
+After that, we wanted to test how the accuracy changes with the size of training data. On less time (40,000 batches), we trained four models with 10% of the training sentence data, 25% of the training sentence data, 50% of the training sentence data, and 100% of the training sentence data. This training ran overnight.
+
+That gave us two models trained on 100% of the training sentences at 40,000 batches and 120,000 batches respectively. The clear next step for us was to train a model using 100% of the training sentences at 80,000 batches.
 
 ## Results
 Our baseline linear model had a PER (phoneme error rate) of about 61%.
 
-EXAMPLE OF SENTENCE TRANSLATED BY MODEL
+Here's an example of our model at work!
+Original, inteded sentence: INTENDED SENTENCE
+Model translation: EXAMPLE OF SENTENCE TRANSLATED BY MODEL
 
-Our second model (nicknamed model A-short) had a PER of about 10.4%.
+Our second model (nicknamed model A) had a PER of about 10.4%. After 4,000 batches, our model had a PER of 36.2%, 23.1% at 8,000, and 13.2% after 24,000 batches completed.
 
-EXAMPLE OF SENTENCE TRANSLATED BY MODEL
+Here's an example of our model at work!
+Original, inteded sentence: INTENDED SENTENCE
+Model translation: EXAMPLE OF SENTENCE TRANSLATED BY MODEL
 
-Our third model (nicknamed model A-long) had a PER of about XX%.
+Our three overnight models (40,000 batches each) trained on 10%, 25%, 50%, and 100% of the training sentences had PERs of 34.5%, 22.7%, 16.5%, and 13.2% respectively.
 
-EXAMPLE OF SENTENCE TRANSLATED BY MODEL
+Here's an example of our models at work!
+10%: The participant's intended speech of "SENTENCE" turned into "SENTENCE"
+25%: The participant's intended speech of "SENTENCE" turned into "SENTENCE"
+50%: The participant's intended speech of "SENTENCE" turned into "SENTENCE"
+100%: The participant's intended speech of "SENTENCE" turned into "SENTENCE"
 
-Our fourth and final model (nicknamed model B) had a PER of about XX%.
+Our trained model with 80,000 batches with all of the training sentences had a PER of 11.1%.
 
-EXAMPLE OF SENTENCE TRANSLATED BY MODEL OR OTHER PROOF OF CONCEPT FOR THIS IDEA
+Here's an example of our model at work!
+Original, intended sentence: INTENDED SENTENCE
+Model translation: EXAMPLE OF SENTENCE TRANSLATED BY MODEL
+
+## Analysis
+All the models we trained significantly outperformed our baseline linear model, even after only a litle bit of training, showing that very little extra work can drastically improve accuracy of a model.
 
 ## What we'd do next
 Each person has different neural patterns that affect our prediction of speech. If we had more time, we would want to tweak/update our system to make it easier to efficiently gather and train data for new individuals. This could help expand the total impact of this tool.
