@@ -44,7 +44,7 @@ Our fourth and final model (nicknamed model B) had a PER of about XX%.
 EXAMPLE OF SENTENCE TRANSLATED BY MODEL OR OTHER PROOF OF CONCEPT FOR THIS IDEA
 
 ## What we'd do next
-Each person has different neural patterns that affect our prediction of speech, so we want to make it easier to train new models for new people. If we had more time, we would want to tweak/update our system to make it easier to efficiently gather and train data for new individuals.
+Each person has different neural patterns that affect our prediction of speech. If we had more time, we would want to tweak/update our system to make it easier to efficiently gather and train data for new individuals. This could help expand the total impact of this tool.
 
 Additionally, we could expand on this by increasing integration and allowing this tool to be used with other tools. For example, TTS (text-to-speech) services could be integrated to actually convert intended speech directly into real speech. For example, we could analyze past clips of the user speaking in an attempt to recreate their voice for this tool, trying to add as much authenticity to this person's synthetic speech.
 
