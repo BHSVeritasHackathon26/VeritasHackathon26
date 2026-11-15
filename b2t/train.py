@@ -47,6 +47,24 @@ def learning_rate_scale(step, total, warmup=1000, floor=0.02):
     return floor + (1 - floor) * 0.5 * (1 + math.cos(math.pi * progress))
 
 
+def keep_fraction(trials, fraction):
+    """Keep a random share of each session's trials, for the data-amount experiment.
+
+    Every session keeps at least one trial, so each per-session layer still gets
+    some training. The shuffle uses a fixed seed, so a smaller fraction is always a
+    subset of a larger one (the 10% trials are all inside the 25% trials).
+    """
+    by_session = {}
+    for t in trials:
+        by_session.setdefault(t.session, []).append(t)
+    kept = []
+    for session in sorted(by_session):
+        group = by_session[session]
+        random.Random(f"fraction-{session}").shuffle(group)
+        kept.extend(group[: max(1, round(len(group) * fraction))])
+    return kept
+
+
 def greedy_decode(logits, out_lengths):
     """Pick the top class at each step, merge repeats, then drop blanks."""
     best = logits.argmax(-1).cpu().numpy()
@@ -89,6 +107,8 @@ def main():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--exclude-holdout", action="store_true",
                    help="leave out the config's holdout_sessions (Run B)")
+    p.add_argument("--train-fraction", type=float, default=1.0,
+                   help="train on only this share of the training sentences (0 to 1)")
     p.add_argument("--limit-sessions", type=int, default=None,
                    help="only use the first N sessions (quick tests on a laptop)")
     args = p.parse_args()
@@ -112,6 +132,13 @@ def main():
     t0 = time.time()
     train = load_trials(cfg, "train", sessions=sessions)
     tune = load_trials(cfg, "tune", sessions=sessions)
+    n_train_available = len(train)
+    if args.train_fraction < 1.0:
+        # Only the training sentences are cut. Tune stays whole, so every run is
+        # scored on the same sentences.
+        train = keep_fraction(train, args.train_fraction)
+        print(f"  keeping {args.train_fraction:.0%} of training sentences: "
+              f"{len(train)} of {n_train_available}")
     print(f"  {len(train)} train and {len(tune)} tune trials in {time.time() - t0:.0f}s")
 
     # Sessions are numbered by their place in the full list, so a model always has
@@ -140,7 +167,7 @@ def main():
     history, best_per, losses = [], float("inf"), []
     t0 = time.time()
     for step in range(1, args.batches + 1):
-        batch = make_batch(random.sample(train, args.batch_size), device)
+        batch = make_batch(random.sample(train, min(args.batch_size, len(train))), device)
         x, lengths = batch["x"], batch["lengths"]
         if settings["augment"]:
             x, lengths = augment(x, lengths)
@@ -185,6 +212,9 @@ def main():
             "phonemes": PHONEMES,
             "all_sessions": splits["sessions"],
             "trained_on_sessions": sessions,
+            "train_fraction": args.train_fraction,
+            "n_train_trials": len(train),
+            "n_train_trials_available": n_train_available,
             "model_kwargs": model_kwargs,
             "settings": settings,
             "args": vars(args),

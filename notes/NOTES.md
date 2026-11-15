@@ -28,16 +28,16 @@ go at the bottom. This feeds the write-up (results, what didn't work, sources).
 - The training script loads only train and tune.
 - 162 of the 1,426 val sentences have the same wording as a training sentence
   (different recordings). To be reported separately.
-- Held-out sessions for the calibration experiment: the six 2025 sessions, which
-  have 173 val trials between them.
+- Six 2025 sessions were set aside for a calibration experiment we later dropped
+  (see "Change of plan"). They have 173 val trials between them.
 
 ### Results so far
 | Run | Model | Sessions | Batches | Tune phoneme error rate | Notes |
 |---|---|---|---|---|---|
 | linear | one linear layer + CTC, 293,929 parameters | all 45 | 5,000 | 61.1% | simple baseline; 14.1 batches/s |
 | run_a | GRU, 5 layers x 768 units, 44.3M parameters | all 45 | 120,000 at batch size 32 | **10.4%** | first attempt (60,000 at batch size 64, 3.4-3.5 batches/s) ran out of memory; see below |
-| run_b | same GRU | 39 (2025 held out) | 80,000 at batch size 32 (planned, overnight) | TODO | for the calibration experiment; about 3.7 hours |
-| run_a_long | same GRU | all 45 | 180,000 at batch size 32 (planned, overnight) | TODO | same model as run_a trained 50% longer; about 8.3 hours. The authors' full length would be 240,000 at this batch size (about 11 hours), which we trimmed to free the GPU by Sunday morning |
+| run_b | same GRU | 39 (2025 held out) | stopped partway | none | dropped Sat 11 PM, see "Change of plan" |
+| run_a_long | same GRU | all 45 | never run | none | dropped Sat 11 PM, see "Change of plan" |
 
 Run A progress on tune (batch size 32): 36.2% at batch 4,000, 23.1% at 8,000,
 13.2% at 24,000. About 6.0 batches/s. These are tune scores taken during training,
@@ -121,6 +121,17 @@ all 1,426 val sentences.
 - Like-for-like with the dataset authors: their baseline scores 10.1% phoneme error
   on this same val set; Run A scores 13.7%. We trained for half as many sentences
   per batch on a smaller GPU.
+**Linear baseline on val (Sat night),** all 1,426 val sentences, for a
+baseline-vs-model comparison on the same unseen data.
+
+| Stage | Linear baseline on val | Run A on val |
+|---|---|---|
+| Phoneme error rate (model alone) | 63.5% | 13.7% |
+| Word error rate, dictionary decoder | 97.0% | 25.4% |
+| Word error rate, language-model decoder | 92.2% | 23.1% |
+
+TODO: confirm the baseline run's last line said "0 sentences fell back".
+
 - **Disclosure for the write-up:** val has now been scored once, for Run A. We did
   not change anything in response. From here on, every choice (which model to keep,
   any decoder changes) is made on tune only. Val is scored again only for the final
@@ -237,29 +248,61 @@ Personal vs shared, for the "retrain for anyone" claim:
 - **In the write-up:** tune scores explain how we chose; val scores are our results
   on unseen data. Report every val score we ever computed and when.
 
-Sunday plan for the final model:
-1. Score `run_a_long` on tune.
-2. Compare with Run A on tune (10.4% phonemes, 17.0% words with Gemini).
-3. Lower tune error wins and is the final model.
-4. If `run_a_long` wins, score it once on val: that is the headline result. If Run A
-   wins, its val score from Saturday night already is the headline result.
-5. Not allowed: scoring both on val and keeping whichever looks better.
+(Sat 11 PM update: there is no longer a second candidate model, so there is no
+choice to make. Run A is the final model and its val score is the headline result.
+The rule above still applies to any decoder changes we try on Sunday.)
 
-Run B is not a candidate for the final model, so it is not scored this way. It is
-used only inside the calibration experiment.
+### Change of plan, Sat about 11 PM
+- **Dropped Run B and the calibration experiment.** Run B (trained without the six
+  2025 sessions) was started at 9:20 PM and stopped partway. We decided that
+  adapting to a later recording day from the same person ("drift") may not reflect
+  what we actually want to show, which is how the system would cope with a new
+  person. `b2t/calibrate.py` stays in the repo, unused.
+- **Dropped the long Run A.** Run A's own record shows it stopped improving around
+  batch 56,000 (10.6%) and ended at 10.4% after 120,000, so training 50% longer was
+  unlikely to change much.
+- **Run A (short) is our final model.** Its val scores from Saturday night (13.7%
+  phonemes, 23.1% words with Gemini) are the headline result. There is no longer a
+  choice between models to make.
+- **Replaced both with the data-amount experiment** (below).
 
-### Overnight runs (started Sat 9:20 PM)
-One command, the two runs one after the other (the GPU can only fit one at a time):
-1. `run_b`: 80,000 batches, about 3.7 hours. First lines confirmed correct:
-   "Loading 39 sessions", "6667 train and 742 tune trials", "44314409 parameters on
-   cuda". 39 = 45 minus the six 2025 sessions; it has the same parameter count as
-   Run A because the six 2025 input layers exist but get no training.
-2. `run_a_long`: 180,000 batches, about 8.3 hours. Expected to finish around 9:30 AM.
+### Data-amount experiment (started Sat night)
+Question: how does accuracy change with the number of training sentences?
+`bash scripts/overnight_fractions.sh` trains the same GRU four times, on a random
+10%, 25%, 50% and 100% of the training sentences, each for 40,000 batches at batch
+size 32 (about 1.85 hours each). All four are scored on the same 808 tune sentences.
 
-Also started Sat night on the CPU: the linear baseline on val, so the baseline and
-our model can be compared on the same unseen data. Writes `results/linear_val.json`.
-Check its last line says "0 sentences fell back"; if not, Gemini's daily limit ran
-out and it needs re-running (cheap, answers are cached).
+| Run | Training sentences | Best tune phoneme error | Batch where it peaked |
+|---|---|---|---|
+| `frac_0.10` | 729 | TODO | TODO |
+| `frac_0.25` | 1,815 | TODO | TODO |
+| `frac_0.50` | 3,632 | TODO | TODO |
+| `frac_1.00` | 7,264 | TODO | TODO |
+
+- Why every run gets the same number of batches, not fewer for less data: with all
+  the data, Run A was still at 18.1% after 12,000 batches and only levelled off
+  near 56,000. Accuracy depends mostly on the number of learning steps. Cutting
+  batches along with data would make a small-data run worse for two reasons at once
+  and we could not tell them apart.
+- Each run records its tune score every 4,000 batches, so the same runs also show
+  how much training each amount of data needs before it stops improving.
+- A fresh 100% run is included, not Run A, so all four points use the same recipe.
+- The fraction is taken within each session (every session keeps at least one
+  sentence), and smaller fractions are subsets of larger ones.
+- Graph to make: training sentences on the x axis, tune phoneme error on the y axis.
+- Caveat: one run per point, so we cannot say how much of any difference is chance.
+
+### How often the model sees each sentence
+- Run A: 120,000 batches x 32 sentences = 3.84 million showings of 7,264 sentences,
+  about 529 times each. (The dataset authors' recipe works out to about 950.)
+- Why this did not cause overfitting that we could measure: every showing is
+  distorted differently (noise, offsets, time shifts), 40% dropout inside the GRU,
+  and we keep the checkpoint with the best tune score, not the last one.
+- Run A's tune phoneme error by batch: 36.3% at 4,000; 14.4% at 20,000; 11.6% at
+  40,000; 10.6% at 56,000; 10.6% at 80,000; 10.4% at 104,000 (best); 10.4% at 120,000.
+  It never turned back upward.
+- Not measured: the model's error on its own training sentences, which would show
+  how much of the tune-to-val gap is memorisation.
 
 ### Glossary
 - **Phoneme:** a basic speech sound. "Cat" is three: K, AE, T.
@@ -311,7 +354,7 @@ out and it needs re-running (cheap, answers are cached).
 | Beats a simple baseline | baseline measured (61.1% phoneme, 95.2% / 89.7% word); Run A scores pending |
 | Where does it fail? At least one example with a reason | baseline examples saved in `results/`; need Run A examples |
 | Results from data the model did not see | val untouched so far; score it once at the end |
-| "What we added" beyond a tutorial | our own question: how much data does a new day need (calibration experiment) |
+| "What we added" beyond a tutorial | our own question: how much training data does this need (data-amount experiment) |
 | Sources and AI tools cited | lists at the bottom of this file |
 
 ### Gemini usage
@@ -326,16 +369,16 @@ out and it needs re-running (cheap, answers are cached).
 ### Still to do
 - [x] Run A finished: 10.4% tune phoneme error rate (baseline 61.1%)
 - [x] Run A scored end to end on tune: 19.1% word error (dictionary), 17.0% (Gemini)
-- [x] Overnight runs started Sat 9:20 PM (run_b, then run_a_long)
-- [ ] Linear baseline on val: record the three error rates (started Sat night)
+- [x] Data-amount experiment started Sat night (four runs, about 7.5 hours)
+- [x] Linear baseline on val: 63.5% phonemes, 97.0% words (dictionary), 92.2% (Gemini)
 - [ ] Back up trained models (`runs/run_a/` etc.) to USB and a GitHub Release
 - [ ] Error breakdown on Run A's tune predictions: what does Gemini fix, what can't it?
 - [x] Linear and Run A results pushed from the Linux box (training records, tune
       and val predictions, audit report)
-- [ ] Morning: copy `run.json` for run_b and run_a_long into `results/`, re-run the
-      audit, push
-- [ ] Calibration experiment with run_b (code not written yet)
-- [ ] Choose final model using tune only; score it on val; report alongside Run A's val score from Sat night
+- [ ] Morning: copy the four `runs/frac_*/run.json` files into `results/`, re-run
+      the audit, push
+- [ ] Morning: record the four data-amount results and make the graph
+- [x] Final model: Run A (short). Val scored Sat night
 - [ ] Breakdowns and graphs (see questions below)
 - [ ] Demo app
 - [ ] Decide track and named user
@@ -358,7 +401,7 @@ where marked, a graph.
 
 Where the evidence for each will come from (not answers):
 - 1: `python -m b2t.check configs/t15.toml` and the Data section above.
-- 2: the calibration experiment with run_b (error vs number of calibration sentences).
+- 2: the data-amount experiment (error vs number of training sentences).
 - 3: `b2t/train.py` (the `DEFAULTS` table) and each run's `run.json`.
 - 4: the per-sentence predictions saved in `results/*.json` by `b2t.evaluate`.
 - 5: the same files, plus the dataset authors' list of which block used which kind
