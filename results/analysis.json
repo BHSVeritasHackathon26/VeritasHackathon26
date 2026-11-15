@@ -372,7 +372,7 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.34458890655691704,
    "best_at_batch": 36000,
-   "tune_word_error_dictionary": null
+   "tune_word_error_dictionary": 0.5316531057749554
   },
   {
    "fraction": 0.25,
@@ -380,7 +380,7 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.2266859975680479,
    "best_at_batch": 36000,
-   "tune_word_error_dictionary": null
+   "tune_word_error_dictionary": 0.37805120063504666
   },
   {
    "fraction": 0.5,
@@ -388,7 +388,7 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.1647179870919465,
    "best_at_batch": 40000,
-   "tune_word_error_dictionary": null
+   "tune_word_error_dictionary": 0.28755705497122447
   },
   {
    "fraction": 1.0,
@@ -396,13 +396,17 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.13179309699747452,
    "best_at_batch": 40000,
-   "tune_word_error_dictionary": null
+   "tune_word_error_dictionary": 0.2371502282198849
   }
  ],
  "training_length": {
   "40000": {
    "file": "frac_1.00_run.json",
    "best_tune_phoneme_error": 0.13179309699747452
+  },
+  "80000": {
+   "file": "run_a_80k_run.json",
+   "best_tune_phoneme_error": 0.11018613787297728
   },
   "120000": {
    "file": "run_a_run.json",

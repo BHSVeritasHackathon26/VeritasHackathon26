@@ -74,10 +74,10 @@ def save(fig, name):
     print(f"  saved figures/{name}")
 
 
-def legend_below(ax, handles=None, title=None):
+def legend_below(ax, handles=None, drop=0.2):
     """A legend in one row under the graph, where it cannot cover the data."""
-    ax.legend(handles=handles, frameon=False, fontsize=9, labelcolor=INK_SOFT, title=title,
-              title_fontsize=9, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncols=4)
+    ax.legend(handles=handles, frameon=False, fontsize=9, labelcolor=INK_SOFT,
+              loc="upper center", bbox_to_anchor=(0.5, -drop), ncols=4)
 
 
 def percent_axis(ax, label):
@@ -321,19 +321,31 @@ def main():
                   f"(best at batch {f['best_at_batch']}){words}")
 
         fig, ax = new_chart("More training sentences, lower error",
-                            "Same model trained on a random share of the training sentences, 40,000 batches each.")
+                            "Same model trained on a share of the training sentences, 40,000 batches each.")
         xs = [f["sentences"] for f in fractions]
         ys = [100 * f["best_tune_phoneme_error"] for f in fractions]
+        have_words = all(f["tune_word_error_dictionary"] is not None for f in fractions)
+        top = max(ys)
+        if have_words:
+            ws = [100 * f["tune_word_error_dictionary"] for f in fractions]
+            top = max(ws)
+            ax.plot(xs, ws, color=SECOND, linewidth=2, marker="o", markersize=8,
+                    markeredgecolor=SURFACE, markeredgewidth=1.5, label="Word error (dictionary decoder)")
+            for x, w in zip(xs, ws):
+                ax.annotate(f"{w:.1f}%", (x, w), textcoords="offset points", xytext=(8, 8),
+                            fontsize=9, color=INK)
         ax.plot(xs, ys, color=OURS, linewidth=2, marker="o", markersize=8,
-                markeredgecolor=SURFACE, markeredgewidth=1.5)
-        for f, x, y in zip(fractions, xs, ys):
-            ax.annotate(f"{y:.1f}%\n({f['fraction']:.0%} of the data)", (x, y), textcoords="offset points",
-                        xytext=(10, 8), fontsize=9, color=INK)
-        ax.set_xlabel("training sentences", color=INK_SOFT, fontsize=9)
-        ax.xaxis.set_major_formatter(lambda v, _: f"{v:,.0f}")
-        ax.set_xlim(0, max(xs) * 1.2)
-        percent_axis(ax, "phoneme error rate (tuning sentences)")
-        ax.set_ylim(0, max(ys) * 1.25)
+                markeredgecolor=SURFACE, markeredgewidth=1.5, label="Phoneme error")
+        for x, y in zip(xs, ys):
+            ax.annotate(f"{y:.1f}%", (x, y), textcoords="offset points", xytext=(8, 8),
+                        fontsize=9, color=INK)
+        ax.set_xticks(xs, [f"{x:,}\n({f['fraction']:.0%})" for x, f in zip(xs, fractions)])
+        ax.set_xlabel("training sentences (share of all training data)", color=INK_SOFT, fontsize=9)
+        ax.set_xlim(0, max(xs) * 1.1)
+        percent_axis(ax, "error rate (tuning sentences)")
+        ax.set_ylim(0, top * 1.2)
+        if have_words:
+            legend_below(ax, drop=0.3)
         save(fig, "data_amount.png")
 
         fig, ax = new_chart("Less data is used up sooner",
