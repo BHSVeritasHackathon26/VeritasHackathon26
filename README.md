@@ -3,12 +3,12 @@
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
 ## The problem
-Hundreds of thousands of people lose the ability to speak because of a loss of motor control of the jaw. Communication is essentially for quality of life and for daily function, and losing the ability to speak is a life changing scenario that's difficult to navigate.
+Hundreds of thousands of people lose the ability to speak because of a loss of motor control of the jaw. Communication is essential for quality of life and for daily function, and losing the ability to speak is a life changing scenario that's difficult to navigate.
 
 **Who it's for:** an adult with ALS (amyotrophic lateral sclerosis) or another motor dysfunction who can no longer speak clearly, at the moment they want to tell a family member or carer something. The input is neural activity recorded while they *attempt* to speak; the output is the sentence as text or voice.
 
 ## What we built
-Those people, however, have a strong advantage over those who have been unable to speak their whole lives - their brains still *know* how to speak, even if they can't make the actual noise. 
+People who have *lost* the ability to speak have a strong advantage over those who have been unable to speak their whole lives - their brains still *know* how to speak, even if they can't make the actual noise. 
 
 We built a model to interpret neural signals from someone's brain into intended speech, allowing English-speakers to effectively convert thought to text.
 
