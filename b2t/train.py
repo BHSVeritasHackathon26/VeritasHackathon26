@@ -106,7 +106,7 @@ def main():
     p.add_argument("--log-every", type=int, default=100)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--exclude-holdout", action="store_true",
-                   help="leave out the config's holdout_sessions (Run B)")
+                   help="leave out the config's holdout_sessions (unused by our reported models)")
     p.add_argument("--train-fraction", type=float, default=1.0,
                    help="train on only this share of the training sentences (0 to 1)")
     p.add_argument("--limit-sessions", type=int, default=None,

@@ -106,12 +106,12 @@ def main(config_path):
     for path in run_files:
         run = json.loads(path.read_text())
         trained = run.get("trained_on_sessions", [])
-        held_out_used = sorted(set(trained) & set(splits["holdout_sessions"]))
         runs.append({
             "file": str(path.relative_to(REPO_ROOT)),
             "model": run.get("model"),
             "n_sessions_trained_on": len(trained),
-            "holdout_sessions_trained_on": held_out_used,
+            "n_sessions_total": len(run.get("all_sessions", [])),
+            "train_fraction": run.get("train_fraction", 1.0),
             "best_tune_per": run.get("best_tune_per"),
         })
 
@@ -147,13 +147,9 @@ def main(config_path):
     print("\nSaved runs:")
     for r in runs or [{"file": "(none found)"}]:
         if "model" in r:
-            # Only the calibration-experiment run (Run B) is meant to leave out the
-            # held-out sessions; every other run is meant to use all sessions.
-            n_held = len(r["holdout_sessions_trained_on"])
-            extra = (f", including the {n_held} calibration sessions (expected, unless "
-                     f"this is the calibration run)" if n_held
-                     else ", with all calibration sessions left out (the calibration run)")
-            print(f"  {r['file']}: {r['model']}, trained on {r['n_sessions_trained_on']} sessions{extra}")
+            print(f"  {r['file']}: {r['model']}, trained on {r['n_sessions_trained_on']} of "
+                  f"{r['n_sessions_total']} sessions, {r['train_fraction']:.0%} of the "
+                  f"training sentences")
         else:
             print(f"  {r['file']}")
     print(f"\nDisclosed, not leakage: {len(repeated)} of {len(meta['val'])} val sentences "

@@ -18,8 +18,9 @@ bin_ms = 20
 tune_fraction = 0.1
 seed = 0
 
-# Sessions the shared network never sees in "Run B". They stand in for a new
-# user/day in the calibration experiment (all six 2025 sessions).
+# Sessions that `--exclude-holdout` leaves out of training. Set up for a
+# calibration experiment (adapting to an unseen day) that we planned and then
+# dropped; none of our reported models use it.
 holdout_sessions = [
     "t15.2025.01.10",
     "t15.2025.01.12",

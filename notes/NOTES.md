@@ -257,7 +257,7 @@ The rule above still applies to any decoder changes we try on Sunday.)
   2025 sessions) was started at 9:20 PM and stopped partway. We decided that
   adapting to a later recording day from the same person ("drift") may not reflect
   what we actually want to show, which is how the system would cope with a new
-  person. `b2t/calibrate.py` stays in the repo, unused.
+  person. The calibration script was removed from the repo; it is in git history at commit `2754fef`.
 - **Dropped the long Run A.** Run A's own record shows it stopped improving around
   batch 56,000 (10.6%) and ended at 10.4% after 120,000, so training 50% longer was
   unlikely to change much.

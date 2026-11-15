@@ -4,7 +4,8 @@
 
 The output file records (1) the session order, which fixes which per-session input
 layer each session uses, (2) which training trials are set aside for tuning, and
-(3) which sessions are held out for the calibration experiment. Because the file is
+(3) which sessions `--exclude-holdout` leaves out of training (not used by any of
+our reported models). Because the file is
 saved in the repo, every result we report uses exactly the same split.
 """
 

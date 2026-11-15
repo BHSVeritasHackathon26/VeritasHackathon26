@@ -7,7 +7,6 @@ one session only, and tests the error-rate functions on examples with known answ
 """
 
 import sys
-from collections import Counter
 
 from b2t.config import load_config
 from b2t.data import SPLITS, load_splits, load_trials
@@ -40,9 +39,6 @@ def main(config_path):
     seen = {normalize_text(t.sentence) for t in meta["train"] + meta["tune"]}
     repeats = sum(normalize_text(t.sentence) in seen for t in meta["val"])
     print(f"  {repeats} of {len(meta['val'])} val sentences also appear in training")
-
-    held = Counter(t.session for t in meta["val"] if t.session in splits["holdout_sessions"])
-    print(f"  held-out sessions have {sum(held.values())} val trials")
 
     # Load real neural features for one session and look at one trial.
     session = splits["sessions"][1]
