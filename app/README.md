@@ -45,7 +45,9 @@ Anyone with a link can use the app, so stop the server when you are done.
 
 ## 3. Use it
 
-The front page is a stack of boxes, one per stage:
+The front page is a stack of boxes, one per stage. At the very top, above everything, is the
+**Attempted sentence** (what the participant was trying to say) whenever it is known; for files
+that don't include it, it says "Not available for this file."
 
 1. **Input**: drag a `.hdf5` file onto the page (or click the box to browse).
 2. **Phonemes**: the sounds the model decoded, as a row of pills (gaps = word breaks),
@@ -54,9 +56,10 @@ The front page is a stack of boxes, one per stage:
    - **After the dictionary**: each group of sounds becomes the closest real word.
      This runs live for every file.
    - **After the language model**: Gemini picks the most sensible words in context.
-4. **Sentence**: the final sentence, read aloud automatically (the speaker button
-   replays it), with the **Attempted sentence** (what the participant was trying to say)
-   underneath when it is known.
+4. **Sentence**: the final sentence, read aloud automatically (the speaker button replays it).
+
+The sun/moon button in the top-right corner switches between light and dark mode. It starts in
+whichever your computer uses and remembers your choice.
 
 A file holds many sentences. The first one shows right away and the rest keep
 decoding behind it; use the ‹ › buttons (or the arrow keys) in the Input box to
@@ -72,8 +75,8 @@ are identical to the saved ones. Any other file, such as a brand-new test file, 
 "Not run for this file" in that row, and the final sentence is the dictionary sentence
 (the box says which one it is).
 
-When the sentence the participant was trying to say is known, it appears under the
-final sentence as a grey **Attempted sentence**. It comes from the file's own label if it
+When the sentence the participant was trying to say is known, it appears at the top
+of the page as the **Attempted sentence**. It comes from the file's own label if it
 has one (`sentence_label` or `transcription`), otherwise from the saved held-out
 results in `results/run_a_val.json` (matched by session, block and trial). Unlabeled
 test files simply show nothing there. The target is for display only: it is never
