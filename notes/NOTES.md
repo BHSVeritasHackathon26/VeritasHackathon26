@@ -282,10 +282,23 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
 
 | Run | Training sentences | Best tune phoneme error | Batch where it peaked |
 |---|---|---|---|
-| `frac_0.10` | 729 | TODO | TODO |
-| `frac_0.25` | 1,815 | TODO | TODO |
-| `frac_0.50` | 3,632 | TODO | TODO |
-| `frac_1.00` | 7,264 | TODO | TODO |
+| `frac_0.10` | 729 | 34.5% | TODO |
+| `frac_0.25` | 1,815 | 22.7% | TODO |
+| `frac_0.50` | 3,632 | 16.5% | TODO |
+| `frac_1.00` | 7,264 | 13.2% | TODO |
+
+Results in (Sun morning), read from the terminal; to be confirmed against the
+`run.json` files once they are pushed.
+- Every doubling of data still helps, by a shrinking amount: 10% -> 25% cut error by
+  11.8 points, 25% -> 50% by 6.2, 50% -> 100% by 3.3. The curve has not flattened, so
+  more recording from this participant would probably still improve the model.
+- With a tenth of the data (729 sentences) the model is far better than the linear
+  baseline trained on everything (34.5% vs 61.1%).
+- The 100% point (13.2%) is worse than Run A (10.4%), which is the same model and
+  data trained three times longer. So 40,000 batches is not enough for the full
+  dataset, and this chart probably understates the benefit of more data at the
+  high end. TODO: check each run's checkpoint history to see which runs had stopped
+  improving by 40,000 batches.
 
 - Why every run gets the same number of batches, not fewer for less data: with all
   the data, Run A was still at 18.1% after 12,000 batches and only levelled off
@@ -299,6 +312,45 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
   sentence), and smaller fractions are subsets of larger ones.
 - Graph to make: training sentences on the x axis, tune phoneme error on the y axis.
 - Caveat: one run per point, so we cannot say how much of any difference is chance.
+
+### Training-length comparison (Sun morning)
+Same model, all the data, three training lengths, each with its own complete
+learning-rate schedule.
+
+| Batches (batch size 32) | Best tune phoneme error | Run |
+|---|---|---|
+| 40,000 | 13.2% | `frac_1.00` |
+| 80,000 | TODO | started early Sun morning |
+| 120,000 | 10.4% | `run_a` (our final model) |
+
+### Drift experiment (planned Sun morning; replaces the dropped calibration idea)
+Question: how fast does accuracy fall as time passes after training, and does a
+quick recalibration bring it back? In practice: how often would a user need to
+recalibrate, and how much would it take?
+
+- Why this framing: we first planned to hold out the 2025 sessions and treat them
+  as a stand-in for a new person. We dropped that because a later day from the same
+  person is not a new person. It is, however, exactly the right data for measuring
+  change over time within one person.
+- Train on the first 27 sessions only, Aug 11 to Dec 29, 2023 (about 4.6 months;
+  4,629 training sentences, 64% of the data). 40,000 batches at batch size 32:
+  `python -m b2t.train ... --out runs/drift --train-until t15.2023.12.29`
+- Test on the 18 later sessions, Feb 25, 2024 to Apr 13, 2025, which fall 2 to 15.5
+  months after the last training day. 15 of them have val sentences (508 in total).
+- For each later session, score its val sentences three ways
+  (`python -m b2t.drift --run runs/drift`):
+  1. no recalibration: the session uses a copy of the last training day's input layer;
+  2. recalibrated on 10 sentences from that day (only that day's input layer is
+     trained; the shared network is locked);
+  3. recalibrated on 50 sentences.
+- Graph to make: months since training on the x axis, phoneme error on the y axis,
+  one line per condition. For reference, Run A's error on the same sessions (it
+  trained on all of them) can be added as a "kept up to date" line.
+- Caveats: sentence types differ between sessions, so some session-to-session change
+  is easier or harder sentences, not drift. Each session has only 23 to 48 val
+  sentences, so single points are noisy. The recalibration settings (200 steps,
+  learning rate 0.001) are a first guess and untuned. One participant only.
+- Results: TODO.
 
 ### How often the model sees each sentence
 - Run A: 120,000 batches x 32 sentences = 3.84 million showings of 7,264 sentences,
@@ -362,7 +414,7 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
 | Beats a simple baseline | baseline measured (61.1% phoneme, 95.2% / 89.7% word); Run A scores pending |
 | Where does it fail? At least one example with a reason | baseline examples saved in `results/`; need Run A examples |
 | Results from data the model did not see | val untouched so far; score it once at the end |
-| "What we added" beyond a tutorial | our own question: how much training data does this need (data-amount experiment) |
+| "What we added" beyond a tutorial | our own questions: how much training data does this need (data-amount experiment), and how fast does it go stale (drift experiment) |
 | Sources and AI tools cited | lists at the bottom of this file |
 
 ### Gemini usage
@@ -385,7 +437,10 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
       and val predictions, audit report)
 - [ ] Morning: copy the four `runs/frac_*/run.json` files into `results/`, re-run
       the audit, push
-- [ ] Morning: record the four data-amount results and make the graph
+- [x] Data-amount results recorded (34.5 / 22.7 / 16.5 / 13.2%)
+- [ ] Make the data-amount graph
+- [ ] Record the 80,000-batch run's result
+- [ ] Train the drift model (`runs/drift`), run `b2t.drift`, record results, make the graph
 - [x] Final model: Run A (short). Val scored Sat night
 - [ ] Breakdowns and graphs (see questions below)
 - [ ] Demo app

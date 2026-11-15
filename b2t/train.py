@@ -107,6 +107,9 @@ def main():
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--exclude-holdout", action="store_true",
                    help="leave out the config's holdout_sessions (unused by our reported models)")
+    p.add_argument("--train-until", default=None, metavar="SESSION",
+                   help="train only on sessions up to and including this one, "
+                        "e.g. t15.2023.12.29 (for the drift experiment)")
     p.add_argument("--train-fraction", type=float, default=1.0,
                    help="train on only this share of the training sentences (0 to 1)")
     p.add_argument("--limit-sessions", type=int, default=None,
@@ -125,6 +128,11 @@ def main():
     sessions = splits["sessions"]
     if args.exclude_holdout:
         sessions = [s for s in sessions if s not in splits["holdout_sessions"]]
+    if args.train_until:
+        # Session names contain their date, so they sort in time order.
+        if args.train_until not in splits["sessions"]:
+            raise SystemExit(f"--train-until: no session called {args.train_until}")
+        sessions = [s for s in sessions if s <= args.train_until]
     if args.limit_sessions:
         sessions = sessions[: args.limit_sessions]
 
