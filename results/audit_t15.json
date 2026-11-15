@@ -1,0 +1,1090 @@
+{
+ "participant": "t15",
+ "checked_at": "2026-11-15T01:04:01+00:00",
+ "code_version": "4c0c63ddc14bd010d9f46dbe77a91806a837eb53",
+ "splits_file_first_committed": "2026-11-14T13:16:28-05:00 85682d3eb5ab051020710dd6db4188c5d073bbff",
+ "all_checks_passed": true,
+ "trial_counts": {
+  "train": 7264,
+  "tune": 808,
+  "val": 1426,
+  "test": 1450
+ },
+ "checks": [
+  {
+   "check": "no trial is in both train and tune",
+   "passed": true,
+   "detail": "0 shared"
+  },
+  {
+   "check": "no trial is in both train and val",
+   "passed": true,
+   "detail": "0 shared"
+  },
+  {
+   "check": "no trial is in both tune and val",
+   "passed": true,
+   "detail": "0 shared"
+  },
+  {
+   "check": "no trial is in both train and test",
+   "passed": true,
+   "detail": "0 shared"
+  },
+  {
+   "check": "no trial is in both tune and test",
+   "passed": true,
+   "detail": "0 shared"
+  },
+  {
+   "check": "no trial is in both val and test",
+   "passed": true,
+   "detail": "0 shared"
+  },
+  {
+   "check": "no recording block is shared between val and train/tune",
+   "passed": true,
+   "detail": "0 shared of 67 val blocks"
+  },
+  {
+   "check": "every train recording is unique within train",
+   "passed": true,
+   "detail": "7264 fingerprints for 7264 trials"
+  },
+  {
+   "check": "every tune recording is unique within tune",
+   "passed": true,
+   "detail": "808 fingerprints for 808 trials"
+  },
+  {
+   "check": "every val recording is unique within val",
+   "passed": true,
+   "detail": "1426 fingerprints for 1426 trials"
+  },
+  {
+   "check": "every test recording is unique within test",
+   "passed": true,
+   "detail": "1450 fingerprints for 1450 trials"
+  },
+  {
+   "check": "no identical recording in both val and train/tune",
+   "passed": true,
+   "detail": "0 identical"
+  },
+  {
+   "check": "no identical recording in both test and train/tune",
+   "passed": true,
+   "detail": "0 identical"
+  },
+  {
+   "check": "no identical recording in both train and tune",
+   "passed": true,
+   "detail": "0 identical"
+  },
+  {
+   "check": "no identical recording in both val and test",
+   "passed": true,
+   "detail": "0 identical"
+  },
+  {
+   "check": "the training script loads only train and tune",
+   "passed": true,
+   "detail": "it loads: train, tune"
+  }
+ ],
+ "runs": [
+  {
+   "file": "results/linear_run.json",
+   "model": "linear",
+   "n_sessions_trained_on": 45,
+   "holdout_sessions_trained_on": [
+    "t15.2025.01.10",
+    "t15.2025.01.12",
+    "t15.2025.03.14",
+    "t15.2025.03.16",
+    "t15.2025.03.30",
+    "t15.2025.04.13"
+   ],
+   "best_tune_per": 0.6109344308296698
+  }
+ ],
+ "val_sentences_with_wording_seen_in_training": {
+  "count": 162,
+  "of": 1426,
+  "note": "Different recordings of the same text. Not leaked data, but easier; report results on these separately.",
+  "trials": [
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 0,
+    "sentence": "It's not at all anything worth talking about."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 1,
+    "sentence": "They can pretty much get everybody there."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 2,
+    "sentence": "Have their bellies rubbed and everything."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 3,
+    "sentence": "Ambiance down there."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 4,
+    "sentence": "Go over there."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 5,
+    "sentence": "Was this his entire family?"
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 6,
+    "sentence": "Is she going to stay home?"
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 7,
+    "sentence": "I look at homemaking as a job also."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 8,
+    "sentence": "My family's not very big."
+   },
+   {
+    "session": "t15.2023.09.24",
+    "block": 9,
+    "trial": 9,
+    "sentence": "They are tempting at times."
+   },
+   {
+    "session": "t15.2023.11.04",
+    "block": 4,
+    "trial": 10,
+    "sentence": "This is really very good."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 0,
+    "sentence": "I hope everything works out up there."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 1,
+    "sentence": "Are you pleased with this decision?"
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 2,
+    "sentence": "The town is just over the hill here."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 3,
+    "sentence": "It's totally ridiculous."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 4,
+    "sentence": "In other words, there is a choice to make."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 5,
+    "sentence": "That does not seem quite fair."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 6,
+    "sentence": "That is horrible."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 7,
+    "sentence": "Fill the jar to the top with boiling water."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 8,
+    "sentence": "It was a prime time football game."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 9,
+    "sentence": "Not too long ago."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 10,
+    "sentence": "She has had really good luck this year."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 11,
+    "sentence": "I went back to school and got my Master's degree."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 12,
+    "sentence": "Then I heard a very loud explosion."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 13,
+    "sentence": "My dad is a potato farmer."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 14,
+    "sentence": "That's a good option to consider."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 15,
+    "sentence": "Do you want to eat inside or outside?"
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 16,
+    "sentence": "And so we usually sit outside."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 17,
+    "sentence": "Professors from other universities will present their research."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 18,
+    "sentence": "They are now starting to make them."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 19,
+    "sentence": "I guess there are a few things around still."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 20,
+    "sentence": "They are so small."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 21,
+    "sentence": "It is a fairly large liberal arts college as well."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 6,
+    "trial": 22,
+    "sentence": "Having a job will keep you out of trouble."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 0,
+    "sentence": "I like it here."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 1,
+    "sentence": "I think they already did that."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 2,
+    "sentence": "Occasionally, the conversation turns into an argument."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 3,
+    "sentence": "We need to buy more and more of them."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 5,
+    "sentence": "I hope you all enjoy this!"
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 6,
+    "sentence": "Where I go to church now."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 7,
+    "sentence": "It's hard for me to admit."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 8,
+    "sentence": "You don't get nearly enough exercise."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 9,
+    "sentence": "She'll be two years old in July."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 10,
+    "sentence": "I filed my taxes early this year."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 11,
+    "sentence": "You still need your mother's permission."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 12,
+    "sentence": "And a very good afternoon to you."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 13,
+    "sentence": "American car companies."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 15,
+    "sentence": "We definitely need a change in the system."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 16,
+    "sentence": "That's pretty much the south end of the state."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 17,
+    "sentence": "I was kind of into it for a while there."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 18,
+    "sentence": "Occasionally, these things may not be true."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 19,
+    "sentence": "I'll get around to it."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 20,
+    "sentence": "It's a package deal."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 21,
+    "sentence": "The result of the test was negative."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 22,
+    "sentence": "I will be visiting New England."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 23,
+    "sentence": "I guess because we don't go out that much."
+   },
+   {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 24,
+    "sentence": "The day care accepted infants starting at six weeks old."
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 0,
+    "sentence": "An absolute certainty."
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 1,
+    "sentence": "I hope I'm on the right track."
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 5,
+    "sentence": "I would contemplate going on a cruise now."
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 7,
+    "sentence": "It was out of his hands at that point."
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 9,
+    "sentence": "My wife and I both like it."
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 10,
+    "sentence": "How do you measure it?"
+   },
+   {
+    "session": "t15.2024.05.10",
+    "block": 7,
+    "trial": 12,
+    "sentence": "She was always a little bit leery of her."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 0,
+    "sentence": "I really like that show."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 1,
+    "sentence": "A fairly good amount."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 2,
+    "sentence": "That pleased me."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 3,
+    "sentence": "We are good people."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 4,
+    "sentence": "I've heard him talk about that for hours."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 5,
+    "sentence": "Of course."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 6,
+    "sentence": "It wasn't even funny."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 7,
+    "sentence": "If only I could remember the name."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 8,
+    "sentence": "I don't think the teachers are the problem."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 9,
+    "sentence": "Public relations."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 10,
+    "sentence": "It's real easy to swing in there for breakfast."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 11,
+    "sentence": "Then you find it again and lose it again."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 12,
+    "sentence": "We've got four kids."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 13,
+    "sentence": "My little girl likes blue more than pink."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 14,
+    "sentence": "In May it will be five years since I met him."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 15,
+    "sentence": "She used to love to do stuff like that."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 16,
+    "sentence": "My wife and daughter were kidnapped."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 17,
+    "sentence": "Satan rejoiced with his birth."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 18,
+    "sentence": "It was his decision and you have to respect it."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 19,
+    "sentence": "No I didn't go to the store."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 20,
+    "sentence": "We will head to Florida for vacation."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 21,
+    "sentence": "Take a stash of books or small quiet toys."
+   },
+   {
+    "session": "t15.2024.07.28",
+    "block": 7,
+    "trial": 23,
+    "sentence": "It was written at a third grade level."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 0,
+    "sentence": "Actually, it makes sense to a certain extent."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 2,
+    "sentence": "When was it?"
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 3,
+    "sentence": "That's a science in itself."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 4,
+    "sentence": "But it didn't get the upper part of my body."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 5,
+    "sentence": "When you decide to make the step."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 7,
+    "sentence": "Get the recipe from them."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 8,
+    "sentence": "About three years ago."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 9,
+    "sentence": "What shall we do?"
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 13,
+    "sentence": "I think it could affect the outcome."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 15,
+    "sentence": "Now I remember it."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 17,
+    "sentence": "About the same I dress for school."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 20,
+    "sentence": "I guess I never heard the history of that."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 21,
+    "sentence": "I wouldn't want them to be on drugs."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 6,
+    "trial": 24,
+    "sentence": "Decisions that are being made by world leaders."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 2,
+    "sentence": "He could get hurt."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 3,
+    "sentence": "Some of them are our problems."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 5,
+    "sentence": "We all like my oldest brother."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 8,
+    "sentence": "Don't you hate that?"
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 10,
+    "sentence": "But do you think Bill Gates should resign?"
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 11,
+    "sentence": "Evidently he was elected president."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 12,
+    "sentence": "We met half way between here and there."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 14,
+    "sentence": "Does it justify the cost?"
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 17,
+    "sentence": "So that's got everybody excited."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 18,
+    "sentence": "Didn't mean to cut you off there."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 22,
+    "sentence": "It's actually the first car we ever bought new."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 23,
+    "sentence": "Keeping things concise is usually the way to go."
+   },
+   {
+    "session": "t15.2025.01.12",
+    "block": 7,
+    "trial": 25,
+    "sentence": "That's really funny but also disturbing."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 0,
+    "sentence": "I hope everything works out up there."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 1,
+    "sentence": "Are you pleased with this decision?"
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 2,
+    "sentence": "The town is just over the hill here."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 3,
+    "sentence": "It is totally ridiculous."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 4,
+    "sentence": "In other words, there is a choice to make."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 5,
+    "sentence": "That does not seem quite fair."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 6,
+    "sentence": "That is horrible."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 7,
+    "sentence": "Fill the jar to the top with boiling water."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 8,
+    "sentence": "It was a prime time football game."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 9,
+    "sentence": "Not too long ago."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 10,
+    "sentence": "She has had really good luck this year."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 4,
+    "trial": 11,
+    "sentence": "I went back to school and got my Master's degree."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 0,
+    "sentence": "I hope everything works out up there."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 1,
+    "sentence": "Are you pleased with this decision?"
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 2,
+    "sentence": "The town is just over the hill here."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 3,
+    "sentence": "It is totally ridiculous."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 4,
+    "sentence": "In other words, there is a choice to make."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 5,
+    "sentence": "That does not seem quite fair."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 6,
+    "sentence": "That is horrible."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 7,
+    "sentence": "Fill the jar to the top with boiling water."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 8,
+    "sentence": "It was a prime time football game."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 9,
+    "sentence": "Not too long ago."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 10,
+    "sentence": "She has had really good luck this year."
+   },
+   {
+    "session": "t15.2025.03.14",
+    "block": 6,
+    "trial": 11,
+    "sentence": "I went back to school and got my Master's degree."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 0,
+    "sentence": "In the next five years."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 1,
+    "sentence": "College credit for community service is a good idea."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 2,
+    "sentence": "Ethical and religious views on need and pleasure."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 3,
+    "sentence": "The past few weeks are a case in point."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 4,
+    "sentence": "The government offers financial services."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 5,
+    "sentence": "Mix some cream sauce with it and pour it over rice."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 6,
+    "sentence": "People are dropping out of school."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 7,
+    "sentence": "A lot of chicken and rice."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 8,
+    "sentence": "As soon as I had them."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 9,
+    "sentence": "I was tired during that whole month."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 10,
+    "sentence": "We hope you enjoy your stay!"
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 11,
+    "sentence": "We are not trying to mistreat them or anything."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 12,
+    "sentence": "How can I avoid being infected by a virus?"
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 13,
+    "sentence": "You don't have to be an expert to play this game."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 14,
+    "sentence": "I live in a farming community."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 15,
+    "sentence": "Do you have any friends with older children?"
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 17,
+    "sentence": "When things don't go right you have to adjust."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 18,
+    "sentence": "What should I do?"
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 19,
+    "sentence": "The first demonstration of a touch screen display."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 20,
+    "sentence": "Not in a civilized society."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 21,
+    "sentence": "And they really seem wise."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 22,
+    "sentence": "If you bring some more stuff."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 23,
+    "sentence": "They're not really even participating."
+   },
+   {
+    "session": "t15.2025.03.16",
+    "block": 5,
+    "trial": 24,
+    "sentence": "Not with all the other things going on today."
+   }
+  ]
+ }
+}
