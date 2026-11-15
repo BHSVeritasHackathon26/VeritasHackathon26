@@ -372,7 +372,9 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.34458890655691704,
    "best_at_batch": 36000,
-   "tune_word_error_dictionary": 0.5316531057749554
+   "tune_word_error_dictionary": 0.5316531057749554,
+   "val_phoneme_error": 0.38461538461538464,
+   "val_word_error_dictionary": 0.5973530968766543
   },
   {
    "fraction": 0.25,
@@ -380,7 +382,9 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.2266859975680479,
    "best_at_batch": 36000,
-   "tune_word_error_dictionary": 0.37805120063504666
+   "tune_word_error_dictionary": 0.37805120063504666,
+   "val_phoneme_error": 0.268578469269424,
+   "val_word_error_dictionary": 0.44986765484383273
   },
   {
    "fraction": 0.5,
@@ -388,7 +392,9 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.1647179870919465,
    "best_at_batch": 40000,
-   "tune_word_error_dictionary": 0.28755705497122447
+   "tune_word_error_dictionary": 0.28755705497122447,
+   "val_phoneme_error": 0.20477386934673367,
+   "val_word_error_dictionary": 0.36273160402329274
   },
   {
    "fraction": 1.0,
@@ -396,7 +402,9 @@
    "batches": 40000,
    "best_tune_phoneme_error": 0.13179309699747452,
    "best_at_batch": 40000,
-   "tune_word_error_dictionary": 0.2371502282198849
+   "tune_word_error_dictionary": 0.2371502282198849,
+   "val_phoneme_error": 0.16797931967529958,
+   "val_word_error_dictionary": 0.30905240868184225
   }
  ],
  "training_length": {

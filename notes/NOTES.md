@@ -296,7 +296,18 @@ Results confirmed against the pushed `run.json` files (Sun morning).
   the end). The 100% run was still improving at 40,000 (15.1% at 20,000, 13.2% at
   the end). The more data there is, the longer it is worth training.
 - Also scored on val on Sunday (dictionary decoder only) as a description of the
-  experiment, not to choose anything. Val results: TODO.
+  experiment, not to choose anything:
+
+  | Share of data | Sentences | Val phoneme error | Val word error (dictionary) |
+  |---|---|---|---|
+  | 10% | 729 | 38.5% | 59.7% |
+  | 25% | 1,815 | 26.9% | 45.0% |
+  | 50% | 3,632 | 20.5% | 36.3% |
+  | 100% | 7,264 | 16.8% | 30.9% |
+
+  Same shape as on tune, with every point 3.6 to 4.3 phoneme points higher. On
+  unseen sentences, a tenth of the data gets about 4 words in 10 right with no
+  language model; all of it gets about 7 in 10. Graph: `figures/data_amount_val.png`.
 - Every doubling of data still helps, by a shrinking amount: 10% -> 25% cut error by
   11.8 points, 25% -> 50% by 6.2, 50% -> 100% by 3.3. The curve has not flattened, so
   more recording from this participant would probably still improve the model.
@@ -333,6 +344,8 @@ learning-rate schedule.
 
 - Doubling training from 40,000 to 80,000 batches cut error by 2.2 points; the next
   40,000 cut it by only 0.6. Most of the benefit of longer training is in by 80,000.
+- On val (dictionary decoder): 40,000 batches 16.8% phonemes / 30.9% words; 80,000
+  14.3% / 26.4%; 120,000 (Run A) 13.7% / 25.4%. Same ordering as on tune.
 - Graph: `figures/training_length.png`.
 
 ### Drift experiment (started Sun about 10:30 AM; replaces the dropped calibration idea)
@@ -438,6 +451,29 @@ recalibrate, and how much would it take?
   predictions costs no requests.
 - Never put the API key in the repo; it is public.
 
+### Every val score we have computed (for the write-up's disclosure)
+Val is the held-out test set. None of these was used to choose a model or a setting.
+
+| Model | When | Decoders | Phonemes | Words (dictionary) | Words (Gemini) |
+|---|---|---|---|---|---|
+| Run A, 120,000 batches (final model) | Sat night | both | 13.7% | 25.4% | 23.1% |
+| Linear baseline | Sat night | both | 63.5% | 97.0% | 92.2% |
+| Data-amount run, 10% | Sun morning | dictionary | 38.5% | 59.7% | - |
+| Data-amount run, 25% | Sun morning | dictionary | 26.9% | 45.0% | - |
+| Data-amount run, 50% | Sun morning | dictionary | 20.5% | 36.3% | - |
+| Data-amount run, 100% (40,000 batches) | Sun morning | dictionary | 16.8% | 30.9% | - |
+| 80,000-batch run | Sun morning | dictionary | 14.3% | 26.4% | - |
+
+Run A was fixed as the final model on Saturday night, before any Sunday val score
+existed, and nothing was changed afterwards because of them.
+
+Housekeeping note (Sun midday): `results/linear_val.json` was overwritten when the
+baseline was re-scored on val without the language model, which removed its Gemini
+result from the file. The phoneme and dictionary numbers were identical. We restored
+Saturday's version from git history (commit `c50d8f8`) so the file again holds all
+three numbers. Lesson: re-running `b2t.evaluate` on the same run and split replaces
+the earlier file.
+
 ### Still to do
 - [x] Run A finished: 10.4% tune phoneme error rate (baseline 61.1%)
 - [x] Run A scored end to end on tune: 19.1% word error (dictionary), 17.0% (Gemini)
@@ -451,7 +487,7 @@ recalibrate, and how much would it take?
       the audit, push
 - [x] Data-amount results recorded (34.5 / 22.7 / 16.5 / 13.2%)
 - [x] Data-amount graph made; 80,000-batch result recorded (11.0%)
-- [ ] Record the data-amount runs' val scores
+- [x] Data-amount runs' val scores recorded
 - [ ] Train the drift model (`runs/drift`), run `b2t.drift`, record results, make the graph
 - [x] Final model: Run A (short). Val scored Sat night
 - [ ] Breakdowns and graphs (see questions below)
@@ -483,6 +519,9 @@ does not separate the two).
 ### Graphs (latest versions)
 All made by `python -m b2t.analyze`, which re-draws every graph from the files in
 `results/`. Re-run it whenever new results arrive. Images are in `figures/`.
+
+**More training sentences, lower error, on held-out sentences** (data-amount experiment, val)
+![Data amount on val](../figures/data_amount_val.png)
 
 **Our model against the simple baseline** (val, 1,426 held-out sentences)
 ![Baseline against our model](../figures/baseline_vs_model.png)

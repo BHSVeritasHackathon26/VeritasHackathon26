@@ -168,10 +168,11 @@ def main():
         keys = ["phoneme_error", "word_error_dictionary", "word_error_llm"]
         for offset, (name, colour, data) in enumerate((("Linear baseline", MUTED, out["linear_val_overall"]),
                                                        ("Our model (GRU)", OURS, out["run_a_val_overall"]))):
-            xs = [i + (offset - 0.5) * 0.36 for i in range(3)]
-            ys = [100 * data[k] for k in keys]
-            ax.bar(xs, ys, width=0.32, color=colour, label=name)
-            for x, y in zip(xs, ys):
+            # A result file scored without the language model has no value for it.
+            shown = [(i + (offset - 0.5) * 0.36, 100 * data[k]) for i, k in enumerate(keys)
+                     if data[k] is not None]
+            ax.bar([x for x, _ in shown], [y for _, y in shown], width=0.32, color=colour, label=name)
+            for x, y in shown:
                 ax.text(x, y + 1.5, f"{y:.1f}%", ha="center", fontsize=9, color=INK)
         ax.set_xticks(range(3), labels)
         percent_axis(ax, "error rate")
@@ -306,10 +307,13 @@ def main():
         r = json.loads(path.read_text())
         best = min(r["history"], key=lambda h: h["tune_per"])
         tune_file = load(path.name.replace("_run.json", "_tune.json"))
+        val_file = load(path.name.replace("_run.json", "_val.json"))
         fractions.append({"fraction": r["train_fraction"], "sentences": r["n_train_trials"],
                           "batches": r["args"]["batches"], "best_tune_phoneme_error": r["best_tune_per"],
                           "best_at_batch": best["step"], "history": r["history"],
-                          "tune_word_error_dictionary": tune_file["word_error_rate_dictionary"] if tune_file else None})
+                          "tune_word_error_dictionary": tune_file["word_error_rate_dictionary"] if tune_file else None,
+                          "val_phoneme_error": val_file["phoneme_error_rate"] if val_file else None,
+                          "val_word_error_dictionary": val_file["word_error_rate_dictionary"] if val_file else None})
     if fractions:
         fractions.sort(key=lambda f: f["sentences"])
         out["data_amount"] = [{k: v for k, v in f.items() if k != "history"} for f in fractions]
@@ -319,34 +323,45 @@ def main():
                      if f["tune_word_error_dictionary"] is not None else "")
             print(f"  {f['fraction']:4.0%}  {f['sentences']:5d} sentences: {f['best_tune_phoneme_error']:.1%} "
                   f"(best at batch {f['best_at_batch']}){words}")
+        if all(f["val_phoneme_error"] is not None for f in fractions):
+            print("Data-amount experiment (val, dictionary decoder)")
+            for f in fractions:
+                print(f"  {f['fraction']:4.0%}  {f['sentences']:5d} sentences: phonemes {f['val_phoneme_error']:.1%}, "
+                      f"words {f['val_word_error_dictionary']:.1%}")
 
-        fig, ax = new_chart("More training sentences, lower error",
-                            "Same model trained on a share of the training sentences, 40,000 batches each.")
         xs = [f["sentences"] for f in fractions]
-        ys = [100 * f["best_tune_phoneme_error"] for f in fractions]
-        have_words = all(f["tune_word_error_dictionary"] is not None for f in fractions)
-        top = max(ys)
-        if have_words:
-            ws = [100 * f["tune_word_error_dictionary"] for f in fractions]
-            top = max(ws)
-            ax.plot(xs, ws, color=SECOND, linewidth=2, marker="o", markersize=8,
-                    markeredgecolor=SURFACE, markeredgewidth=1.5, label="Word error (dictionary decoder)")
-            for x, w in zip(xs, ws):
-                ax.annotate(f"{w:.1f}%", (x, w), textcoords="offset points", xytext=(8, 8),
+        for split, phoneme_key, word_key, where, file_name in (
+                ("tune", "best_tune_phoneme_error", "tune_word_error_dictionary", "tuning sentences", "data_amount.png"),
+                ("val", "val_phoneme_error", "val_word_error_dictionary", "held-out sentences", "data_amount_val.png")):
+            if any(f[phoneme_key] is None for f in fractions):
+                continue
+            fig, ax = new_chart("More training sentences, lower error",
+                                f"Same model trained on a share of the training sentences, 40,000 batches each. "
+                                f"Scored on the {where}.")
+            ys = [100 * f[phoneme_key] for f in fractions]
+            have_words = all(f[word_key] is not None for f in fractions)
+            top = max(ys)
+            if have_words:
+                ws = [100 * f[word_key] for f in fractions]
+                top = max(ws)
+                ax.plot(xs, ws, color=SECOND, linewidth=2, marker="o", markersize=8,
+                        markeredgecolor=SURFACE, markeredgewidth=1.5, label="Word error (dictionary decoder)")
+                for x, w in zip(xs, ws):
+                    ax.annotate(f"{w:.1f}%", (x, w), textcoords="offset points", xytext=(8, 8),
+                                fontsize=9, color=INK)
+            ax.plot(xs, ys, color=OURS, linewidth=2, marker="o", markersize=8,
+                    markeredgecolor=SURFACE, markeredgewidth=1.5, label="Phoneme error")
+            for x, y in zip(xs, ys):
+                ax.annotate(f"{y:.1f}%", (x, y), textcoords="offset points", xytext=(8, 8),
                             fontsize=9, color=INK)
-        ax.plot(xs, ys, color=OURS, linewidth=2, marker="o", markersize=8,
-                markeredgecolor=SURFACE, markeredgewidth=1.5, label="Phoneme error")
-        for x, y in zip(xs, ys):
-            ax.annotate(f"{y:.1f}%", (x, y), textcoords="offset points", xytext=(8, 8),
-                        fontsize=9, color=INK)
-        ax.set_xticks(xs, [f"{x:,}\n({f['fraction']:.0%})" for x, f in zip(xs, fractions)])
-        ax.set_xlabel("training sentences (share of all training data)", color=INK_SOFT, fontsize=9)
-        ax.set_xlim(0, max(xs) * 1.1)
-        percent_axis(ax, "error rate (tuning sentences)")
-        ax.set_ylim(0, top * 1.2)
-        if have_words:
-            legend_below(ax, drop=0.3)
-        save(fig, "data_amount.png")
+            ax.set_xticks(xs, [f"{x:,}\n({f['fraction']:.0%})" for x, f in zip(xs, fractions)])
+            ax.set_xlabel("training sentences (share of all training data)", color=INK_SOFT, fontsize=9)
+            ax.set_xlim(0, max(xs) * 1.1)
+            percent_axis(ax, "error rate")
+            ax.set_ylim(0, top * 1.2)
+            if have_words:
+                legend_below(ax, drop=0.3)
+            save(fig, file_name)
 
         fig, ax = new_chart("Less data is used up sooner",
                             "Phoneme error during training, for four amounts of training data.")
