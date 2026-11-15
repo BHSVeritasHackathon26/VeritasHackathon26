@@ -11,15 +11,19 @@ Connect the model by editing model_adapter.py.
 """
 
 import base64
+import difflib
 import json
 import os
+import random
 import shutil
 import socket
+import sys
 import tempfile
 import threading
 import time
 import traceback
 from contextlib import asynccontextmanager, nullcontext
+from functools import lru_cache
 from pathlib import Path
 
 import h5py
@@ -31,7 +35,55 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 import model_adapter
 
 HERE = Path(__file__).parent
+REPO = HERE.parent
 PORT = int(os.environ.get("PORT", "8000"))
+
+# ---------------------------------------------------------------------------
+# Held-out sentence explorer
+#
+# Besides decoding dropped files, the page can browse the held-out (val)
+# sentences: the real neural recording beside what our trained model predicted
+# for it. The predictions come from a results file saved by `b2t.evaluate`, so
+# this works on a computer that does not have the trained model.
+# ---------------------------------------------------------------------------
+EXPLORER = None  # filled in at start-up if the results file and data are present
+EXPLORER_RESULTS = REPO / "results" / "run_a_val.json"
+EXPLORER_CONFIG = REPO / "configs" / "t15.toml"
+
+
+def load_explorer():
+    sys.path.insert(0, str(REPO))  # so the b2t package can be imported
+    from b2t.config import load_config
+
+    cfg = load_config(EXPLORER_CONFIG)
+    with open(EXPLORER_RESULTS) as fh:
+        results = json.load(fh)
+    rows = {}  # session -> {"block-trial": row}
+    for r in results["sentences"]:
+        rows.setdefault(r["session"], {})[f"{r['block']}-{r['trial']}"] = r
+    return {"cfg": cfg, "split": results["split"], "rows": rows, "run": results.get("run"),
+            "llm_model": results.get("llm_model"), "n": len(results["sentences"])}
+
+
+@lru_cache(maxsize=4)
+def explorer_trials(session):
+    """The recordings for one session's held-out sentences, keyed like the rows."""
+    from b2t.data import load_trials
+
+    trials = load_trials(EXPLORER["cfg"], EXPLORER["split"], sessions=[session])
+    return {f"{t.block}-{t.trial}": t for t in trials}
+
+
+def mark_words(predicted, truth):
+    """Split `predicted` into pieces tagged ok / wrong / missing against `truth`."""
+    pred, true = predicted.split(), truth.split()
+    out = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(a=pred, b=true).get_opcodes():
+        if op == "insert":  # a true word has no counterpart here
+            out.append({"t": "", "s": "missing"})
+        else:
+            out.append({"t": " ".join(pred[i1:i2]), "s": "ok" if op == "equal" else "wrong"})
+    return out
 
 STATE = {"model": None, "demo": True, "error": None, "load_seconds": 0.0}
 PREDICT_LOCK = threading.Lock()  # one trial at a time through the model
@@ -47,6 +99,12 @@ async def lifespan(_app):
         STATE["error"] = traceback.format_exc()
         print("\n!! load_model() failed -- running in demo mode:\n" + STATE["error"])
     STATE["load_seconds"] = time.perf_counter() - t0
+    global EXPLORER
+    try:
+        EXPLORER = load_explorer()
+        print(f"  Held-out explorer: {EXPLORER['n']} sentences from {EXPLORER_RESULTS.name}")
+    except Exception as e:
+        print(f"  Held-out explorer unavailable ({type(e).__name__}: {e})")
     print("\n" + "=" * 60)
     print("  DEMO MODE (no model connected yet)" if STATE["demo"]
           else f"  Model loaded in {STATE['load_seconds']:.1f}s")
@@ -106,7 +164,7 @@ def find_trials(f):
     return out
 
 
-def make_preview(x, rows=32, cols=120):
+def make_preview(x, rows=32, cols=120):  # the explorer asks for a finer one
     """Small 8-bit heat-map of the neural activity, for the UI."""
     try:
         x = np.asarray(x, dtype=np.float32)
@@ -163,7 +221,64 @@ def index():
 @app.get("/api/status")
 def status():
     return {"ok": True, "demo": STATE["demo"], "model_name": model_adapter.MODEL_NAME,
-            "load_error": STATE["error"]}
+            "load_error": STATE["error"], "explorer": EXPLORER is not None}
+
+
+@app.get("/api/explorer")
+def explorer_index():
+    """The sessions and sentences that can be browsed."""
+    if EXPLORER is None:
+        return {"available": False}
+    return {"available": True, "split": EXPLORER["split"], "n": EXPLORER["n"],
+            "llm_model": EXPLORER["llm_model"],
+            "sessions": [{"name": s, "sentences": [{"key": k, "label": f"block {r['block']}, trial {r['trial']}"}
+                                                    for k, r in rows.items()]}
+                         for s, rows in sorted(EXPLORER["rows"].items())]}
+
+
+@app.get("/api/sentence")
+def explorer_sentence(session: str = "", key: str = ""):
+    """One held-out sentence: its recording and what the model predicted.
+
+    Leave session and key empty for a random sentence."""
+    if EXPLORER is None:
+        return JSONResponse({"error": "The held-out explorer is not available on this server."}, status_code=404)
+    from b2t.metrics import edit_distance, normalize_text
+
+    rows = EXPLORER["rows"]
+    if not session:
+        session = random.choice(list(rows))
+        key = random.choice(list(rows[session]))
+    if session not in rows or key not in rows[session]:
+        return JSONResponse({"error": "No such sentence."}, status_code=404)
+    row = rows[session][key]
+    trial = explorer_trials(session)[key]
+    cfg = EXPLORER["cfg"]
+
+    truth = normalize_text(row["truth"])
+    true_words = truth.split()
+
+    def decoder(name, sentence):
+        words = sentence.split()
+        return {"name": name, "text": sentence, "pieces": mark_words(sentence, truth),
+                "wrong": edit_distance(words, true_words), "of": len(true_words)}
+
+    decoders = [decoder("Dictionary decoder", row["dictionary"])]
+    if row.get("llm") is not None:
+        decoders.append(decoder("Language-model decoder", normalize_text(row["llm"])))
+    return {
+        "session": session, "key": key, "block": row["block"], "trial": row["trial"],
+        "truth": truth,
+        "phonemes": " ".join(row["predicted_phonemes"]),
+        "phonemes_wrong": edit_distance(row["predicted_phonemes"], row["true_phonemes"]),
+        "phonemes_of": len(row["true_phonemes"]),
+        "decoders": decoders,
+        "text": decoders[-1]["text"],  # what the page shows large and reads aloud
+        "steps": trial.n_steps, "seconds": round(trial.n_steps * cfg.bin_ms / 1000, 1),
+        "n_features": cfg.n_features,
+        "preview": make_preview(trial.features, rows=128, cols=480),
+        "split": EXPLORER["split"],
+    }
 
 
 @app.post("/api/decode")

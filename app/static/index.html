@@ -73,6 +73,43 @@
   .btn.primary:hover { filter: brightness(1.1); }
   .btn svg { width: 16px; height: 16px; }
 
+  /* held-out sentence explorer */
+  .explore { display: none; margin-bottom: 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 18px;
+    background: var(--panel); }
+  .explore.show { display: block; }
+  .explore .row { margin-top: 12px; gap: 14px; }
+  .explore label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .explore select { background: #1a2038; border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; }
+  .explore .btn.primary { margin-left: auto; }
+  .explore .hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* the neural recording, drawn large with its axes named */
+  .axis { display: none; justify-content: space-between; gap: 12px; padding: 7px 14px 0; font-size: 11px;
+    color: var(--dim); font-family: var(--mono); }
+  .hero.detail canvas { height: 190px; opacity: 1; }
+  .hero.detail .axis { display: flex; }
+  /* time labels sit exactly under the moment they name */
+  .hero.detail #axisTicks { display: block; position: relative; height: 22px; padding: 0; margin: 0 14px; }
+  #axisTicks span { position: absolute; top: 7px; transform: translateX(-50%); white-space: nowrap; }
+  #axisTicks span:first-child { transform: none; }
+  #axisTicks span:last-child { transform: translateX(-100%); }
+  .axis.cap { justify-content: center; padding-top: 2px; }
+
+  /* truth, phonemes and each decoder, side by side */
+  .compare { display: none; margin-top: 20px; border-top: 1px solid var(--line); }
+  .compare.show { display: block; }
+  .crow { display: flex; gap: 16px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid #1b2138; }
+  .crow:last-child { border-bottom: 0; padding-bottom: 2px; }
+  .crow .k { flex: 0 0 170px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .crow .v { flex: 1; min-width: 0; font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+  .crow .v.mono { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .crow .v.truth { color: var(--a1); }
+  .crow .sc { flex: none; }
+  .wrong { background: #fb718533; color: #fecdd3; border-radius: 5px; padding: 1px 5px; }
+  .miss { color: var(--bad); font-weight: 700; }
+  .note { color: var(--dim); font-size: 12px; margin-top: 12px; }
+  @media (max-width: 600px) { .crow { flex-direction: column; gap: 5px; } .crow .k { flex: none; } .explore .btn.primary { margin-left: 0; } }
+
   /* hero result */
   #results { display: none; }
   #results.show { display: block; }
@@ -97,6 +134,7 @@
   .controls input[type=checkbox] { accent-color: var(--a1); width: 15px; height: 15px; }
   .summary { margin-left: auto; font-family: var(--mono); font-size: 12px; }
   .list { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel); }
+  .list:empty { display: none; }
   .item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; cursor: pointer; border-top: 1px solid #1b2138;
     animation: in .25s ease-out; }
   .item:first-child { border-top: 0; }
@@ -124,6 +162,45 @@
 
   <div class="banner" id="banner"></div>
 
+  <div class="explore" id="explore">
+    <div class="label">Held-out sentences · the model never trained on these</div>
+    <div class="hint" id="exploreHint"></div>
+    <div class="row">
+      <label>Session <select id="exSession"></select></label>
+      <label>Sentence <select id="exSentence"></select></label>
+      <button class="btn primary" id="randBtn">Random sentence</button>
+    </div>
+  </div>
+
+  <section id="results">
+    <div class="hero" id="hero">
+      <canvas id="raster" width="120" height="32" aria-hidden="true"></canvas>
+      <div class="axis" id="axisTicks"></div>
+      <div class="axis cap"><span id="axisMid"></span></div>
+      <div class="body">
+        <div class="label" id="heroLabel">Decoded sentence</div>
+        <div class="sentence" id="sentence" aria-live="polite"></div>
+        <div class="row">
+          <button class="btn primary" id="speakBtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="speakText">Read aloud</span></button>
+          <button class="btn" id="copyBtn">Copy</button>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="compare" id="compare"></div>
+        <div class="note" id="note"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <label><input type="checkbox" id="autoSpeak" checked> Read aloud automatically</label>
+      <label>Voice <select id="voice"></select></label>
+      <label>Speed <input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1"></label>
+      <div class="summary" id="summary"></div>
+    </div>
+
+    <div class="list" id="list"></div>
+  </section>
+
+  <div class="label" style="margin: 26px 2px 10px">Decode a file with the connected model</div>
   <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose an HDF5 file">
     <div class="big">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></div>
@@ -142,34 +219,11 @@
     <input type="file" id="fileInput" accept=".hdf5,.h5,.hdf" hidden>
   </div>
 
-  <section id="results">
-    <div class="hero">
-      <canvas id="raster" width="120" height="32" aria-hidden="true"></canvas>
-      <div class="body">
-        <div class="label" id="heroLabel">Decoded sentence</div>
-        <div class="sentence" id="sentence" aria-live="polite"></div>
-        <div class="row">
-          <button class="btn primary" id="speakBtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="speakText">Read aloud</span></button>
-          <button class="btn" id="copyBtn">Copy</button>
-          <div class="chips" id="chips"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="controls">
-      <label><input type="checkbox" id="autoSpeak" checked> Read aloud automatically</label>
-      <label>Voice <select id="voice"></select></label>
-      <label>Speed <input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1"></label>
-      <div class="summary" id="summary"></div>
-    </div>
-
-    <div class="list" id="list"></div>
-  </section>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
-const S = { results: [], sel: -1, total: 0, xhr: null, msSum: 0, okCount: 0, t0: 0 };
+const S = { results: [], sel: -1, total: 0, xhr: null, msSum: 0, okCount: 0, t0: 0, cur: null, explorer: false };
 
 /* ---------- server status ---------- */
 async function checkStatus() {
@@ -180,6 +234,7 @@ async function checkStatus() {
     pill.className = 'pill ' + (s.demo ? 'demo' : 'ok');
     $('pillText').textContent = s.demo ? 'Demo mode · no model connected' : 'Model connected · ' + s.model_name;
     if (s.load_error) showBanner('The model failed to load, so the server is in demo mode. Check the server terminal for the error.', true);
+    else if (s.demo && s.explorer) showBanner('No live model on this computer. The held-out sentences below show real predictions saved earlier from our trained model. Dropping a file gives made-up placeholder sentences until the model is connected in model_adapter.py.');
     else if (s.demo) showBanner('Demo mode: the trained model is not connected yet, so the output below is made-up placeholder sentences, not predictions. Fill in model_adapter.py on the model computer.');
     else hideBanner();
   } catch {
@@ -213,7 +268,7 @@ function decodeFile(file) {
   speechSynthesis && speechSynthesis.cancel();
   Object.assign(S, { results: [], sel: -1, total: 0, msSum: 0, okCount: 0, t0: performance.now() });
   $('list').textContent = ''; $('summary').textContent = '';
-  $('results').classList.remove('show');
+  if (!S.explorer) $('results').classList.remove('show');
   drop.classList.add('compact');
   $('fileName').textContent = file.name;
   $('fileMeta').textContent = 'Uploading… ' + fmtSize(file.size);
@@ -304,10 +359,103 @@ function updateSummary() {
   $('summary').textContent = parts.join(' · ');
 }
 
+/* ---------- held-out sentence explorer ---------- */
+let exIndex = null;
+async function initExplorer() {
+  try {
+    const d = await (await fetch('/api/explorer', { cache: 'no-store' })).json();
+    if (!d.available) return;
+    exIndex = d; S.explorer = true;
+    $('explore').classList.add('show');
+    $('exploreHint').textContent = d.n.toLocaleString() + ' sentences the participant attempted to say, with the recording and what our model decoded.';
+    d.sessions.forEach(s => { const o = el('option', '', s.name); o.value = s.name; $('exSession').append(o); });
+    fillSentences(d.sessions[0].name);
+    loadSentence(d.sessions[0].name, d.sessions[0].sentences[0].key, false);
+  } catch {}
+}
+function fillSentences(session, key) {
+  const sel = $('exSentence'); sel.textContent = '';
+  const s = exIndex.sessions.find(x => x.name === session); if (!s) return;
+  s.sentences.forEach(x => { const o = el('option', '', x.label); o.value = x.key; sel.append(o); });
+  if (key) sel.value = key;
+}
+async function loadSentence(session, key, maySpeak) {
+  const q = session ? '?session=' + encodeURIComponent(session) + '&key=' + encodeURIComponent(key) : '';
+  let d;
+  try { d = await (await fetch('/api/sentence' + q, { cache: 'no-store' })).json(); }
+  catch { return showBanner('Could not reach the server. Is it still running?', true); }
+  if (d.error) return showBanner(d.error, true);
+  $('exSession').value = d.session; fillSentences(d.session, d.key);
+  showSentence(d, maySpeak);
+}
+$('exSession').addEventListener('change', () => {
+  fillSentences($('exSession').value);
+  loadSentence($('exSession').value, $('exSentence').value, true);
+});
+$('exSentence').addEventListener('change', () => loadSentence($('exSession').value, $('exSentence').value, true));
+$('randBtn').addEventListener('click', () => loadSentence('', '', true));
+
+function pieces(list) {
+  const span = document.createElement('span');
+  list.forEach((p, i) => {
+    if (i) span.append(' ');
+    if (p.s === 'ok') span.append(p.t);
+    else if (p.s === 'wrong') span.append(el('span', 'wrong', p.t));
+    else span.append(el('span', 'miss', '\u23B5'));
+  });
+  return span;
+}
+function crow(label, value, cls, wrong, of, unit) {
+  const row = el('div', 'crow');
+  const v = el('div', 'v' + (cls ? ' ' + cls : ''));
+  if (typeof value === 'string') v.textContent = value; else v.append(value);
+  row.append(el('div', 'k', label), v);
+  if (of != null) {
+    const pct = Math.round(wrong / Math.max(of, 1) * 100);
+    row.append(el('span', 'chip sc ' + (wrong === 0 ? 'g' : pct <= 25 ? 'w' : 'b'), wrong + ' of ' + of + ' ' + unit + ' wrong'));
+  }
+  return row;
+}
+function showSentence(d, maySpeak) {
+  S.sel = -1; S.cur = { text: d.text };
+  document.querySelectorAll('.item').forEach(n => n.classList.remove('sel'));
+  $('results').classList.add('show');
+  $('hero').classList.add('detail');
+  $('heroLabel').textContent = 'Decoded sentence · ' + d.decoders[d.decoders.length - 1].name.toLowerCase();
+  const sEl = $('sentence'); sEl.className = 'sentence'; sEl.textContent = d.text || '(empty)';
+
+  const chips = $('chips'); chips.textContent = '';
+  chips.append(el('span', 'chip', d.seconds.toFixed(1) + ' s of signal'), el('span', 'chip', d.session),
+               el('span', 'chip', 'block ' + d.block + ' · trial ' + d.trial));
+  $('axisMid').textContent = 'time · neural recording of ' + d.n_features + ' features × ' + d.steps + ' time steps';
+  const ticks = $('axisTicks'); ticks.textContent = '';
+  for (let k = 0; k <= 6; k++) {
+    const t = el('span', '', (d.seconds * k / 6).toFixed(1) + ' s');
+    t.style.left = (k / 6 * 100) + '%';
+    ticks.append(t);
+  }
+  drawRaster(d.preview);
+
+  const c = $('compare'); c.textContent = ''; c.classList.add('show');
+  c.append(crow('What they were trying to say', d.truth, 'truth'),
+           crow('Phonemes from the model', d.phonemes, 'mono', d.phonemes_wrong, d.phonemes_of, 'phonemes'));
+  d.decoders.forEach(x => c.append(crow(x.name, pieces(x.pieces), '', x.wrong, x.of, 'words')));
+  $('note').textContent = 'Highlighted words differ from what they were trying to say; \u23B5 marks a missing word. ' +
+    'These predictions were saved earlier by running our trained model on this recording.';
+
+  $('speakBtn').style.display = $('copyBtn').style.display = '';
+  if (maySpeak && $('autoSpeak').checked) speak(d.text); else stopSpeaking();
+}
+initExplorer();
+
 /* ---------- hero ---------- */
 function select(i, maySpeak) {
   const r = S.results[i]; if (!r) return;
-  S.sel = i;
+  S.sel = i; S.cur = r.error ? null : { text: r.text };
+  $('hero').classList.remove('detail');
+  const cmp = $('compare'); cmp.textContent = ''; cmp.classList.toggle('show', !r.error && !!r.phonemes);
+  if (!r.error && r.phonemes) cmp.append(crow('Phonemes from the model', r.phonemes, 'mono'));
+  $('note').textContent = '';
   document.querySelectorAll('.item').forEach(n => n.classList.toggle('sel', +n.dataset.i === i));
   const sEl = $('sentence'); sEl.textContent = ''; sEl.className = 'sentence' + (r.error ? ' err' : '');
   $('heroLabel').textContent = 'Decoded sentence · trial ' + (i + 1);
@@ -381,11 +529,11 @@ function stopSpeaking() { if (canSpeak) speechSynthesis.cancel(); setSpeaking(fa
 function setSpeaking(on) { $('speakBtn').classList.toggle('speaking', on); $('speakText').textContent = on ? 'Stop' : 'Read aloud'; }
 $('speakBtn').addEventListener('click', () => {
   if ($('speakBtn').classList.contains('speaking')) return stopSpeaking();
-  const r = S.results[S.sel]; if (r) speak(r.text);
+  if (S.cur) speak(S.cur.text);
 });
 $('copyBtn').addEventListener('click', async () => {
-  const r = S.results[S.sel]; if (!r) return;
-  try { await navigator.clipboard.writeText(r.text); $('copyBtn').textContent = 'Copied'; setTimeout(() => $('copyBtn').textContent = 'Copy', 1200); } catch {}
+  if (!S.cur) return;
+  try { await navigator.clipboard.writeText(S.cur.text); $('copyBtn').textContent = 'Copied'; setTimeout(() => $('copyBtn').textContent = 'Copy', 1200); } catch {}
 });
 
 /* ---------- helpers ---------- */

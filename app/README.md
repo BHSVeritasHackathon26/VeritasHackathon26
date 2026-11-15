@@ -53,6 +53,23 @@ the model finishes them. Click a row (or use ↑ / ↓) to show it large and hea
 - "Read aloud" uses the browser's built-in voices; pick the voice and speed
   under the result.
 
+## Browsing the held-out sentences
+
+When the repo's `results/run_a_val.json` and the `hdf5_data_final/` data folder are
+present, the top of the page also lets you browse the 1,426 held-out (val)
+sentences: pick a session and sentence, or press **Random sentence**. For each one
+it shows the neural recording, what the participant was trying to say, the phonemes
+the model produced, and the sentence from the dictionary decoder and from the
+language-model decoder, with wrong words highlighted and error counts.
+
+These predictions were saved earlier by `python -m b2t.evaluate`, so this part works
+on a computer that does not have the trained model. The page says so. Start the
+server from the repo root so it can find those files:
+
+```bash
+python app/server.py
+```
+
 ## It cannot train the model
 
 The server only runs `predict()`. It contains no training code, runs the model
