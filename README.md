@@ -1,4 +1,5 @@
 # NeuroScribe
+**TL;DR** This project decodes attempted speech from neural data into text. We reached a 13.7% phoneme error rate and almost 80% of our translated words were correct.
 **Track:** AI + Languages\
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
@@ -15,7 +16,7 @@ We built a model to interpret neural signals from someone's brain into intended 
 Using BCI (brain computer interfaces), it is possible to receive information about neural firings in specific parts of the brain. This data acts as the input for our model. Our model outputs predicted phonemes, which can then be converted into real English words and sentences.
 > A phoneme is the smallest unit of spoken sound in a language. We are using the 39 phonemes of American English (the language our data is for), plus a silence marker between words and a "blank", for 41 classes in total.
 
-We used Card et al.'s public dataset and approach, but trained our own model using our own code and device. We also used different data splits to best fit our approach. Our biggest difference from the Card et al. lab was the questions we chose to ask and how we decided to answer them.
+We used Card et al.'s public dataset and approach, but trained our own model using our own code and device. We also used different data splits to best fit our approach. Our biggest difference from the Card et al. lab was the questions we chose to ask and how we decided to answer them: how do training data size, training duration, and signal drift affect model quality? How can we correct for signal drift?
 
 ## How it works
 ![Diagram of how the model works](https://raw.githubusercontent.com/Neuroprosthetics-Lab/nejm-brain-to-text/main/b2txt_methods_overview.png)\
