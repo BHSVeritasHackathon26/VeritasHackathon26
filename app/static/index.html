@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thought to Text</title>
+<style>
+  :root {
+    --bg: #070912; --panel: #10142299; --panel-solid: #111627; --line: #232a42;
+    --text: #eef1fb; --muted: #8b93b3; --dim: #5b6386;
+    --a1: #5eead4; --a2: #818cf8; --a3: #c084fc;
+    --good: #4ade80; --warn: #fbbf24; --bad: #fb7185;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--sans);
+    background-image:
+      radial-gradient(900px 500px at 15% -10%, #818cf82b, transparent 60%),
+      radial-gradient(800px 500px at 95% 0%, #5eead41f, transparent 60%);
+    background-attachment: fixed;
+  }
+  button, select, input { font: inherit; color: inherit; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+  .logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--a1), var(--a2) 55%, var(--a3)); flex: none; }
+  .logo svg { width: 24px; height: 24px; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
+  h1 span { background: linear-gradient(90deg, var(--a1), var(--a3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .pill { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);
+    padding: 7px 13px; border: 1px solid var(--line); border-radius: 99px; background: var(--panel); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); }
+  .pill.ok .dot { background: var(--good); box-shadow: 0 0 10px var(--good); }
+  .pill.demo .dot { background: var(--warn); box-shadow: 0 0 10px var(--warn); }
+  .pill.off .dot { background: var(--bad); box-shadow: 0 0 10px var(--bad); }
+
+  .banner { display: none; margin-bottom: 18px; padding: 11px 14px; border-radius: 12px; font-size: 14px;
+    border: 1px solid #fbbf2455; background: #fbbf2414; color: #fde68a; }
+  .banner.show { display: block; }
+  .banner.err { border-color: #fb718555; background: #fb718514; color: #fecdd3; }
+
+  /* drop zone */
+  .drop { position: relative; border: 1.5px dashed #3a4470; border-radius: 22px; background: var(--panel);
+    padding: 54px 24px; text-align: center; cursor: pointer; transition: .2s; outline: none; }
+  .drop:hover, .drop:focus-visible { border-color: var(--a2); background: #151a2eb0; }
+  .drop.over { border-color: var(--a1); background: #5eead414; transform: scale(1.01); box-shadow: 0 0 0 6px #5eead412; }
+  .drop .icon { width: 58px; height: 58px; margin: 0 auto 16px; border-radius: 18px; display: grid; place-items: center;
+    background: #818cf81f; color: var(--a2); }
+  .drop .icon svg { width: 28px; height: 28px; }
+  .drop h2 { margin: 0 0 6px; font-size: 21px; letter-spacing: -.01em; }
+  .drop p { margin: 0; color: var(--muted); font-size: 14px; }
+  .drop u { color: var(--a1); text-underline-offset: 3px; }
+  .drop.compact { padding: 14px 18px; text-align: left; border-style: solid; border-color: var(--line); cursor: default; transform: none; }
+  .drop.compact .big { display: none; }
+  .filebar { display: none; align-items: center; gap: 14px; }
+  .drop.compact .filebar { display: flex; }
+  .filebar .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .filebar .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .filebar .grow { flex: 1; min-width: 0; }
+  .bar { height: 4px; border-radius: 4px; background: #232a42; margin-top: 9px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: 4px; transition: width .15s;
+    background: linear-gradient(90deg, var(--a1), var(--a2), var(--a3)); }
+  .btn { border: 1px solid var(--line); background: #1a2038; padding: 8px 14px; border-radius: 10px; cursor: pointer;
+    font-size: 14px; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; transition: .15s; }
+  .btn:hover { border-color: var(--a2); background: #222a4a; }
+  .btn.primary { border: 0; color: #06121a; font-weight: 600; background: linear-gradient(135deg, var(--a1), var(--a2)); }
+  .btn.primary:hover { filter: brightness(1.1); }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* hero result */
+  #results { display: none; }
+  #results.show { display: block; }
+  .hero { margin-top: 18px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel-solid); overflow: hidden; }
+  .hero canvas { display: block; width: 100%; height: 84px; opacity: .9; }
+  .hero .body { padding: 22px 26px 22px; }
+  .label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .sentence { font-family: var(--serif); font-size: clamp(26px, 4.4vw, 40px); line-height: 1.25; margin: 10px 0 16px;
+    letter-spacing: -.01em; min-height: 1.25em; overflow-wrap: anywhere; }
+  .sentence.err { font-family: var(--mono); font-size: 15px; color: var(--bad); }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+  .chip { font-size: 12px; color: var(--muted); border: 1px solid var(--line); padding: 4px 9px; border-radius: 99px; font-family: var(--mono); }
+  .chip.g { color: var(--good); border-color: #4ade8044; } .chip.w { color: var(--warn); border-color: #fbbf2444; } .chip.b { color: var(--bad); border-color: #fb718544; }
+  .speaking { border-color: var(--a1) !important; color: var(--a1); }
+
+  /* controls + list */
+  .controls { margin: 16px 2px 10px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .controls select { background: #1a2038; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; max-width: 190px; }
+  .controls input[type=range] { width: 90px; accent-color: var(--a2); }
+  .controls label { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+  .controls input[type=checkbox] { accent-color: var(--a1); width: 15px; height: 15px; }
+  .summary { margin-left: auto; font-family: var(--mono); font-size: 12px; }
+  .list { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--panel); }
+  .item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; cursor: pointer; border-top: 1px solid #1b2138;
+    animation: in .25s ease-out; }
+  .item:first-child { border-top: 0; }
+  .item:hover { background: #1a203899; }
+  .item.sel { background: #818cf81c; box-shadow: inset 3px 0 0 var(--a2); }
+  .item .n { font-family: var(--mono); font-size: 12px; color: var(--dim); width: 30px; flex: none; }
+  .item .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+  .item .t.err { color: var(--bad); font-family: var(--mono); font-size: 13px; }
+  .item .ms { font-family: var(--mono); font-size: 12px; color: var(--dim); flex: none; }
+  @keyframes in { from { opacity: 0; transform: translateY(6px); } }
+  @media (max-width: 600px) { .chips { margin-left: 0; } .item .ms { display: none; } .hero .body { padding: 18px; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#06121a" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h2.5l2-6 3.5 12 3-9 2 5 1.5-2H21"/></svg></div>
+    <div>
+      <h1>Thought <span>→</span> Text</h1>
+      <div class="sub">Veritas Hackathon '26 · neural speech decoding</div>
+    </div>
+    <div class="pill" id="pill"><span class="dot"></span><span id="pillText">Connecting…</span></div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose an HDF5 file">
+    <div class="big">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg></div>
+      <h2>Drop a test file here</h2>
+      <p>Drag in an <b>.hdf5</b> file of neural recordings, or <u>browse</u>. Decoding starts immediately.</p>
+    </div>
+    <div class="filebar">
+      <div class="grow">
+        <div class="name" id="fileName"></div>
+        <div class="meta" id="fileMeta"></div>
+        <div class="bar"><i id="barFill"></i></div>
+      </div>
+      <button class="btn" id="stopBtn">Stop</button>
+      <button class="btn primary" id="newBtn">New file</button>
+    </div>
+    <input type="file" id="fileInput" accept=".hdf5,.h5,.hdf" hidden>
+  </div>
+
+  <section id="results">
+    <div class="hero">
+      <canvas id="raster" width="120" height="32" aria-hidden="true"></canvas>
+      <div class="body">
+        <div class="label" id="heroLabel">Decoded sentence</div>
+        <div class="sentence" id="sentence" aria-live="polite"></div>
+        <div class="row">
+          <button class="btn primary" id="speakBtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="speakText">Read aloud</span></button>
+          <button class="btn" id="copyBtn">Copy</button>
+          <div class="chips" id="chips"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <label><input type="checkbox" id="autoSpeak" checked> Read aloud automatically</label>
+      <label>Voice <select id="voice"></select></label>
+      <label>Speed <input type="range" id="rate" min="0.6" max="1.6" step="0.1" value="1"></label>
+      <div class="summary" id="summary"></div>
+    </div>
+
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const S = { results: [], sel: -1, total: 0, xhr: null, msSum: 0, okCount: 0, t0: 0 };
+
+/* ---------- server status ---------- */
+async function checkStatus() {
+  const pill = $('pill');
+  try {
+    const r = await fetch('/api/status', { cache: 'no-store' });
+    const s = await r.json();
+    pill.className = 'pill ' + (s.demo ? 'demo' : 'ok');
+    $('pillText').textContent = s.demo ? 'Demo mode · no model connected' : 'Model connected · ' + s.model_name;
+    if (s.load_error) showBanner('The model failed to load, so the server is in demo mode. Check the server terminal for the error.', true);
+    else if (s.demo) showBanner('Demo mode: the trained model is not connected yet, so the output below is made-up placeholder sentences, not predictions. Fill in model_adapter.py on the model computer.');
+    else hideBanner();
+  } catch {
+    pill.className = 'pill off';
+    $('pillText').textContent = 'Server offline';
+  }
+}
+function showBanner(msg, err) { const b = $('banner'); b.textContent = msg; b.className = 'banner show' + (err ? ' err' : ''); }
+function hideBanner() { $('banner').className = 'banner'; }
+checkStatus(); setInterval(checkStatus, 5000);
+
+/* ---------- drag & drop ---------- */
+const drop = $('drop'), input = $('fileInput');
+const busy = () => drop.classList.contains('compact');
+drop.addEventListener('click', e => { if (!busy()) input.click(); });
+drop.addEventListener('keydown', e => { if (!busy() && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); input.click(); } });
+input.addEventListener('change', () => { if (input.files[0]) decodeFile(input.files[0]); input.value = ''; });
+// Accept a drop anywhere on the page, so a file can also replace the current one.
+['dragenter', 'dragover'].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+window.addEventListener('dragleave', e => { if (!e.relatedTarget) drop.classList.remove('over'); });
+window.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('over');
+  const f = e.dataTransfer.files[0]; if (f) decodeFile(f);
+});
+$('stopBtn').addEventListener('click', e => { e.stopPropagation(); if (S.xhr) S.xhr.abort(); finish('Stopped'); });
+$('newBtn').addEventListener('click', e => { e.stopPropagation(); input.click(); });
+
+/* ---------- upload + streamed decoding ---------- */
+function decodeFile(file) {
+  if (S.xhr) S.xhr.abort();
+  speechSynthesis && speechSynthesis.cancel();
+  Object.assign(S, { results: [], sel: -1, total: 0, msSum: 0, okCount: 0, t0: performance.now() });
+  $('list').textContent = ''; $('summary').textContent = '';
+  $('results').classList.remove('show');
+  drop.classList.add('compact');
+  $('fileName').textContent = file.name;
+  $('fileMeta').textContent = 'Uploading… ' + fmtSize(file.size);
+  $('barFill').style.width = '0%';
+  $('stopBtn').style.display = '';
+
+  const xhr = S.xhr = new XMLHttpRequest();
+  const form = new FormData(); form.append('file', file);
+  let seen = 0;
+  xhr.open('POST', '/api/decode');
+  xhr.upload.onprogress = e => {
+    if (e.lengthComputable) {
+      $('barFill').style.width = (e.loaded / e.total * 100) + '%';
+      if (e.loaded === e.total) $('fileMeta').textContent = 'Decoding…';
+    }
+  };
+  const pump = () => {
+    if (xhr !== S.xhr || xhr.status !== 200) return;
+    const text = xhr.responseText; let nl;
+    while ((nl = text.indexOf('\n', seen)) !== -1) {
+      const line = text.slice(seen, nl); seen = nl + 1;
+      if (line.trim()) onMessage(JSON.parse(line));
+    }
+  };
+  xhr.onprogress = pump;
+  xhr.onload = () => {
+    if (xhr !== S.xhr) return;
+    if (xhr.status !== 200) {
+      let msg = 'Server error (' + xhr.status + ')';
+      try { msg = JSON.parse(xhr.responseText).error || msg; } catch {}
+      return fail(msg);
+    }
+    pump(); if (S.xhr === xhr) finish();
+  };
+  xhr.onerror = () => { if (xhr === S.xhr) fail('Could not reach the model server. Is it still running?'); };
+  xhr.send(form);
+}
+
+function onMessage(m) {
+  if (m.type === 'start') {
+    S.total = m.n_trials;
+    $('barFill').style.width = '0%';
+    $('fileMeta').textContent = 'Decoding 0 / ' + S.total;
+  } else if (m.type === 'trial') {
+    addResult(m);
+  } else if (m.type === 'fatal') {
+    fail(m.error);
+  }
+}
+
+function addResult(r) {
+  if (!r.error) { S.msSum += r.ms; S.okCount++; }
+  const i = S.results.push(r) - 1;
+
+  const row = document.createElement('div');
+  row.className = 'item'; row.dataset.i = i;
+  const n = el('div', 'n', String(i + 1).padStart(2, '0'));
+  const t = el('div', 't' + (r.error ? ' err' : ''), r.error ? r.error : (r.text || '(empty)'));
+  row.append(n, t);
+  if (!r.error) row.append(el('div', 'ms', Math.round(r.ms) + ' ms'));
+  row.addEventListener('click', () => select(i, true));
+  $('list').append(row);
+
+  $('results').classList.add('show');
+  $('barFill').style.width = (S.results.length / S.total * 100) + '%';
+  $('fileMeta').textContent = 'Decoding ' + S.results.length + ' / ' + S.total;
+  updateSummary();
+  if (i === 0) select(0, true);
+}
+
+function finish(prefix) {
+  S.xhr = null;
+  $('stopBtn').style.display = 'none';
+  const secs = ((performance.now() - S.t0) / 1000).toFixed(1);
+  $('fileMeta').textContent = (prefix ? prefix + ' · ' : '') + S.results.length + ' of ' + (S.total || '?') +
+    ' trials decoded in ' + secs + ' s';
+  if (!prefix) $('barFill').style.width = '100%';
+}
+function fail(msg) {
+  S.xhr = null;
+  drop.classList.remove('compact');
+  showBanner(msg, true);
+}
+
+function updateSummary() {
+  const parts = [];
+  if (S.okCount) parts.push('avg ' + Math.round(S.msSum / S.okCount) + ' ms / trial');
+  $('summary').textContent = parts.join(' · ');
+}
+
+/* ---------- hero ---------- */
+function select(i, maySpeak) {
+  const r = S.results[i]; if (!r) return;
+  S.sel = i;
+  document.querySelectorAll('.item').forEach(n => n.classList.toggle('sel', +n.dataset.i === i));
+  const sEl = $('sentence'); sEl.textContent = ''; sEl.className = 'sentence' + (r.error ? ' err' : '');
+  $('heroLabel').textContent = 'Decoded sentence · trial ' + (i + 1);
+  if (r.error) sEl.textContent = r.error;
+  else sEl.textContent = r.text || '(empty)';
+
+  const chips = $('chips'); chips.textContent = '';
+  if (r.ms != null) chips.append(el('span', 'chip', Math.round(r.ms) + ' ms'));
+  if (r.steps) chips.append(el('span', 'chip', (r.steps * 0.02).toFixed(1) + ' s of signal'));
+  if (r.session) chips.append(el('span', 'chip', r.session));
+  drawRaster(r.preview);
+  $('speakBtn').style.display = $('copyBtn').style.display = r.error ? 'none' : '';
+  if (maySpeak && $('autoSpeak').checked && !r.error) speak(r.text); else stopSpeaking();
+}
+document.addEventListener('keydown', e => {
+  if (!S.results.length || ['INPUT', 'SELECT'].includes(e.target.tagName)) return;
+  const d = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
+  if (!d) return;
+  e.preventDefault();
+  const i = Math.max(0, Math.min(S.results.length - 1, S.sel + d));
+  select(i, true);
+  document.querySelector('.item.sel')?.scrollIntoView({ block: 'nearest' });
+});
+
+function drawRaster(p) {
+  const c = $('raster'); c.style.display = p ? '' : 'none'; if (!p) return;
+  c.width = p.w; c.height = p.h;
+  const ctx = c.getContext('2d'), img = ctx.createImageData(p.w, p.h), raw = atob(p.data);
+  const stops = [[10, 13, 28], [67, 56, 160], [129, 140, 248], [94, 234, 212], [236, 254, 250]];
+  for (let k = 0; k < raw.length; k++) {
+    const v = raw.charCodeAt(k) / 255 * (stops.length - 1), a = Math.min(Math.floor(v), stops.length - 2), f = v - a;
+    for (let ch = 0; ch < 3; ch++) img.data[k * 4 + ch] = stops[a][ch] + (stops[a + 1][ch] - stops[a][ch]) * f;
+    img.data[k * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/* ---------- text to speech ---------- */
+const canSpeak = 'speechSynthesis' in window;
+let voices = [];
+function loadVoices() {
+  voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  if (!voices.length) voices = speechSynthesis.getVoices();
+  const sel = $('voice'), saved = store('voice');
+  sel.textContent = '';
+  voices.forEach((v, i) => { const o = el('option', '', v.name); o.value = i; sel.append(o); });
+  let pick = voices.findIndex(v => v.name === saved);
+  if (pick < 0) pick = voices.findIndex(v => v.default);
+  if (pick < 0) pick = voices.findIndex(v => v.lang === 'en-US');
+  sel.value = Math.max(pick, 0);
+}
+if (canSpeak) { loadVoices(); speechSynthesis.addEventListener('voiceschanged', loadVoices); }
+else { $('speakBtn').disabled = true; $('speakText').textContent = 'Speech not supported'; $('autoSpeak').checked = false; }
+$('voice').addEventListener('change', () => store('voice', voices[$('voice').value]?.name));
+$('rate').value = store('rate') || 1;
+$('rate').addEventListener('change', () => store('rate', $('rate').value));
+if (store('auto') === '0') $('autoSpeak').checked = false;
+$('autoSpeak').addEventListener('change', () => store('auto', $('autoSpeak').checked ? '1' : '0'));
+
+function speak(text) {
+  if (!canSpeak || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = voices[$('voice').value]; if (v) u.voice = v;
+  u.rate = +$('rate').value;
+  u.onstart = () => setSpeaking(true);
+  u.onend = u.onerror = () => setSpeaking(false);
+  speechSynthesis.speak(u);
+}
+function stopSpeaking() { if (canSpeak) speechSynthesis.cancel(); setSpeaking(false); }
+function setSpeaking(on) { $('speakBtn').classList.toggle('speaking', on); $('speakText').textContent = on ? 'Stop' : 'Read aloud'; }
+$('speakBtn').addEventListener('click', () => {
+  if ($('speakBtn').classList.contains('speaking')) return stopSpeaking();
+  const r = S.results[S.sel]; if (r) speak(r.text);
+});
+$('copyBtn').addEventListener('click', async () => {
+  const r = S.results[S.sel]; if (!r) return;
+  try { await navigator.clipboard.writeText(r.text); $('copyBtn').textContent = 'Copied'; setTimeout(() => $('copyBtn').textContent = 'Copy', 1200); } catch {}
+});
+
+/* ---------- helpers ---------- */
+function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+function fmtSize(b) { return b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.ceil(b / 1e3) + ' KB'; }
+function store(k, v) { try { if (v === undefined) return localStorage.getItem('t2t.' + k); localStorage.setItem('t2t.' + k, v); } catch { return null; } }
+</script>
+</body>
+</html>
