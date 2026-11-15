@@ -159,9 +159,10 @@ As always, our model can definitely be improved. Another possible course of acti
 - [GitHub repository](https://github.com/Neuroprosthetics-Lab/nejm-brain-to-text)
 - [Data available on Dryad](https://datadryad.org/dataset/doi:10.5061/dryad.dncjsxm85)
 - [Kaggle competition](https://www.kaggle.com/competitions/brain-to-text-25/data)
-- [CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) (via the `cmudict` Python package)
-- [Google Gemini API](https://aistudio.google.com) (`gemini-3.5-flash-lite`) for the language-model decoder
-- Libraries: PyTorch, NumPy, h5py, cmudict, google-genai
+
+[CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) (via the `cmudict` Python package)
+[Google Gemini API](https://aistudio.google.com) (`gemini-3.5-flash-lite`) for the language-model decoder
+Libraries: PyTorch, NumPy, h5py, cmudict, google-genai
 
 ## AI tools used
 - Claude Code (Anthropic): project planning, explanations, and helping write the code in `b2t/`
