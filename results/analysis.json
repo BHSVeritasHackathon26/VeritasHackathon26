@@ -3,8 +3,9 @@
   "sentences": 1426,
   "phoneme_error": 0.13744201778121376,
   "word_error_dictionary": 0.253996823716252,
-  "word_error_llm": 0.23123345685547908
+  "word_error_llm": 0.2109052408681842
  },
+ "run_a_val_llm_model": "gemini-3.1-flash-lite",
  "linear_val_overall": {
   "sentences": 1426,
   "phoneme_error": 0.6348569771936606,
@@ -16,13 +17,13 @@
    "sentences": 1037,
    "phoneme_error": 0.14053430309811876,
    "word_error_dictionary": 0.25305568130375733,
-   "word_error_llm": 0.22876112871585935
+   "word_error_llm": 0.21291685528896936
   },
   "Openwebtext": {
    "sentences": 80,
    "phoneme_error": 0.17846693973083674,
    "word_error_dictionary": 0.3347457627118644,
-   "word_error_llm": 0.3064971751412429
+   "word_error_llm": 0.2754237288135593
   },
   "Random": {
    "sentences": 39,
@@ -34,57 +35,57 @@
    "sentences": 45,
    "phoneme_error": 0.1695710455764075,
    "word_error_dictionary": 0.3888888888888889,
-   "word_error_llm": 0.3861111111111111
+   "word_error_llm": 0.3055555555555556
   },
   "Freq words": {
    "sentences": 225,
    "phoneme_error": 0.08115025594700391,
    "word_error_dictionary": 0.15419354838709678,
-   "word_error_llm": 0.1335483870967742
+   "word_error_llm": 0.11032258064516129
   }
  },
  "val_types_seen_in_training": {
   "sentences": 1262,
   "phoneme_error": 0.1293416572077185,
   "word_error_dictionary": 0.23431576372752844,
-  "word_error_llm": 0.21071297541885778
+  "word_error_llm": 0.19346948758713464
  },
  "val_types_not_seen_in_training": {
   "sentences": 164,
   "phoneme_error": 0.18384265279583875,
   "word_error_dictionary": 0.38091482649842273,
-  "word_error_llm": 0.3635646687697161
+  "word_error_llm": 0.32334384858044163
  },
  "val_by_sentence_length": {
   "10-12": {
    "sentences": 124,
    "phoneme_error": 0.14470096346118888,
    "word_error_dictionary": 0.271889400921659,
-   "word_error_llm": 0.2557603686635945
+   "word_error_llm": 0.22580645161290322
   },
   "7-9": {
    "sentences": 575,
    "phoneme_error": 0.1326004272390976,
    "word_error_dictionary": 0.25044404973357015,
-   "word_error_llm": 0.2257992895204263
+   "word_error_llm": 0.20293072824156305
   },
   "1-3": {
    "sentences": 73,
    "phoneme_error": 0.19457013574660634,
    "word_error_dictionary": 0.3217821782178218,
-   "word_error_llm": 0.31683168316831684
+   "word_error_llm": 0.297029702970297
   },
   "4-6": {
    "sentences": 646,
    "phoneme_error": 0.13707597698869273,
    "word_error_dictionary": 0.2486470234515935,
-   "word_error_llm": 0.22459410703547805
+   "word_error_llm": 0.2110643415514131
   },
   "13+": {
    "sentences": 8,
    "phoneme_error": 0.1276595744680851,
    "word_error_dictionary": 0.22522522522522523,
-   "word_error_llm": 0.2072072072072072
+   "word_error_llm": 0.1981981981981982
   }
  },
  "val_by_repeated_wording": {
@@ -92,23 +93,23 @@
    "sentences": 1264,
    "phoneme_error": 0.13400293973542382,
    "word_error_dictionary": 0.2506274650412334,
-   "word_error_llm": 0.22744113780327477
+   "word_error_llm": 0.2059280506752719
   },
   "wording also in training": {
    "sentences": 162,
    "phoneme_error": 0.16458960034379028,
    "word_error_dictionary": 0.28014842300556586,
-   "word_error_llm": 0.2606679035250464
+   "word_error_llm": 0.24953617810760667
   }
  },
  "language_model_effect": {
-  "sentences_improved": 263,
-  "sentences_worse": 71,
-  "sentences_unchanged": 1092,
+  "sentences_improved": 366,
+  "sentences_worse": 48,
+  "sentences_unchanged": 1012,
   "word_errors_dictionary": 2399,
-  "word_errors_llm": 2184,
+  "word_errors_llm": 1992,
   "sentences_perfect_dictionary": 315,
-  "sentences_perfect_llm": 406,
+  "sentences_perfect_llm": 477,
   "sentences_perfect_phonemes": 222
  },
  "run_a_tune_overall": {
@@ -128,97 +129,97 @@
    "sentences": 49,
    "phoneme_error": 0.0997485331098072,
    "word_error_dictionary": 0.20577617328519857,
-   "word_error_llm": 0.19494584837545126
+   "word_error_llm": 0.1624548736462094
   },
   "t15.2023.08.20": {
    "sentences": 48,
    "phoneme_error": 0.0857823669579031,
    "word_error_dictionary": 0.15753424657534246,
-   "word_error_llm": 0.1506849315068493
+   "word_error_llm": 0.11301369863013698
   },
   "t15.2023.08.25": {
    "sentences": 25,
    "phoneme_error": 0.0963855421686747,
    "word_error_dictionary": 0.15723270440251572,
-   "word_error_llm": 0.1509433962264151
+   "word_error_llm": 0.12578616352201258
   },
   "t15.2023.08.27": {
    "sentences": 25,
    "phoneme_error": 0.15755627009646303,
    "word_error_dictionary": 0.3115942028985507,
-   "word_error_llm": 0.2826086956521739
+   "word_error_llm": 0.2536231884057971
   },
   "t15.2023.09.01": {
    "sentences": 49,
    "phoneme_error": 0.052759740259740256,
    "word_error_dictionary": 0.11705685618729098,
-   "word_error_llm": 0.08361204013377926
+   "word_error_llm": 0.09364548494983277
   },
   "t15.2023.09.03": {
    "sentences": 34,
    "phoneme_error": 0.13182897862232779,
    "word_error_dictionary": 0.20218579234972678,
-   "word_error_llm": 0.18579234972677597
+   "word_error_llm": 0.12568306010928962
   },
   "t15.2023.09.24": {
    "sentences": 35,
    "phoneme_error": 0.10072815533980582,
    "word_error_dictionary": 0.20918367346938777,
-   "word_error_llm": 0.1836734693877551
+   "word_error_llm": 0.16326530612244897
   },
   "t15.2023.09.29": {
    "sentences": 48,
    "phoneme_error": 0.11295469049138482,
    "word_error_dictionary": 0.20630372492836677,
-   "word_error_llm": 0.166189111747851
+   "word_error_llm": 0.15472779369627507
   },
   "t15.2023.10.01": {
    "sentences": 44,
    "phoneme_error": 0.1525759577278732,
    "word_error_dictionary": 0.3003194888178914,
-   "word_error_llm": 0.26198083067092653
+   "word_error_llm": 0.23322683706070288
   },
   "t15.2023.10.06": {
    "sentences": 36,
    "phoneme_error": 0.07319698600645856,
    "word_error_dictionary": 0.16666666666666666,
-   "word_error_llm": 0.13063063063063063
+   "word_error_llm": 0.0945945945945946
   },
   "t15.2023.10.08": {
    "sentences": 17,
    "phoneme_error": 0.2070365358592693,
    "word_error_dictionary": 0.35333333333333333,
-   "word_error_llm": 0.31333333333333335
+   "word_error_llm": 0.3
   },
   "t15.2023.10.13": {
    "sentences": 44,
    "phoneme_error": 0.1908456167571761,
    "word_error_dictionary": 0.371900826446281,
-   "word_error_llm": 0.36363636363636365
+   "word_error_llm": 0.3512396694214876
   },
   "t15.2023.10.15": {
    "sentences": 44,
    "phoneme_error": 0.14502307185234015,
    "word_error_dictionary": 0.2708333333333333,
-   "word_error_llm": 0.25595238095238093
+   "word_error_llm": 0.22321428571428573
   },
   "t15.2023.10.20": {
    "sentences": 9,
    "phoneme_error": 0.1644295302013423,
    "word_error_dictionary": 0.4225352112676056,
-   "word_error_llm": 0.38028169014084506
+   "word_error_llm": 0.2535211267605634
   },
   "t15.2023.10.22": {
    "sentences": 33,
    "phoneme_error": 0.11247216035634744,
    "word_error_dictionary": 0.22535211267605634,
-   "word_error_llm": 0.22065727699530516
+   "word_error_llm": 0.18779342723004694
   },
   "t15.2023.11.03": {
    "sentences": 50,
    "phoneme_error": 0.1621438263229308,
    "word_error_dictionary": 0.32456140350877194,
-   "word_error_llm": 0.3362573099415205
+   "word_error_llm": 0.29239766081871343
   },
   "t15.2023.11.04": {
    "sentences": 15,
@@ -230,139 +231,139 @@
    "sentences": 25,
    "phoneme_error": 0.03265940902021773,
    "word_error_dictionary": 0.07738095238095238,
-   "word_error_llm": 0.06547619047619048
+   "word_error_llm": 0.041666666666666664
   },
   "t15.2023.11.19": {
    "sentences": 20,
    "phoneme_error": 0.03792415169660679,
    "word_error_dictionary": 0.08461538461538462,
-   "word_error_llm": 0.09230769230769231
+   "word_error_llm": 0.07692307692307693
   },
   "t15.2023.11.26": {
    "sentences": 44,
    "phoneme_error": 0.09492753623188406,
    "word_error_dictionary": 0.2158273381294964,
-   "word_error_llm": 0.20863309352517986
+   "word_error_llm": 0.2014388489208633
   },
   "t15.2023.12.03": {
    "sentences": 34,
    "phoneme_error": 0.07773109243697479,
    "word_error_dictionary": 0.1320754716981132,
-   "word_error_llm": 0.09433962264150944
+   "word_error_llm": 0.10849056603773585
   },
   "t15.2023.12.08": {
    "sentences": 50,
    "phoneme_error": 0.09454061251664447,
    "word_error_dictionary": 0.17417417417417416,
-   "word_error_llm": 0.16516516516516516
+   "word_error_llm": 0.14114114114114115
   },
   "t15.2023.12.10": {
    "sentences": 25,
    "phoneme_error": 0.08541392904073587,
    "word_error_dictionary": 0.16071428571428573,
-   "word_error_llm": 0.11904761904761904
+   "word_error_llm": 0.10714285714285714
   },
   "t15.2023.12.17": {
    "sentences": 30,
    "phoneme_error": 0.13513513513513514,
    "word_error_dictionary": 0.27896995708154504,
-   "word_error_llm": 0.2317596566523605
+   "word_error_llm": 0.1888412017167382
   },
   "t15.2023.12.29": {
    "sentences": 50,
    "phoneme_error": 0.10706932052161977,
    "word_error_dictionary": 0.2222222222222222,
-   "word_error_llm": 0.1921921921921922
+   "word_error_llm": 0.16516516516516516
   },
   "t15.2024.02.25": {
    "sentences": 23,
    "phoneme_error": 0.09129213483146068,
    "word_error_dictionary": 0.20121951219512196,
-   "word_error_llm": 0.14634146341463414
+   "word_error_llm": 0.1524390243902439
   },
   "t15.2024.03.08": {
    "sentences": 24,
    "phoneme_error": 0.21906116642958748,
    "word_error_dictionary": 0.391304347826087,
-   "word_error_llm": 0.34782608695652173
+   "word_error_llm": 0.36024844720496896
   },
   "t15.2024.03.15": {
    "sentences": 48,
    "phoneme_error": 0.20825515947467166,
    "word_error_dictionary": 0.35082872928176795,
-   "word_error_llm": 0.3259668508287293
+   "word_error_llm": 0.3314917127071823
   },
   "t15.2024.03.17": {
    "sentences": 48,
    "phoneme_error": 0.1199442119944212,
    "word_error_dictionary": 0.21428571428571427,
-   "word_error_llm": 0.18452380952380953
+   "word_error_llm": 0.16071428571428573
   },
   "t15.2024.05.10": {
    "sentences": 25,
    "phoneme_error": 0.150074294205052,
    "word_error_dictionary": 0.23717948717948717,
-   "word_error_llm": 0.23076923076923078
+   "word_error_llm": 0.22435897435897437
   },
   "t15.2024.06.14": {
    "sentences": 25,
    "phoneme_error": 0.14353312302839116,
    "word_error_dictionary": 0.271523178807947,
-   "word_error_llm": 0.25165562913907286
+   "word_error_llm": 0.2251655629139073
   },
   "t15.2024.07.19": {
    "sentences": 48,
    "phoneme_error": 0.20566908371786422,
    "word_error_dictionary": 0.3628571428571429,
-   "word_error_llm": 0.34
+   "word_error_llm": 0.3028571428571429
   },
   "t15.2024.07.21": {
    "sentences": 46,
    "phoneme_error": 0.08551724137931034,
    "word_error_dictionary": 0.17971014492753623,
-   "word_error_llm": 0.15942028985507245
+   "word_error_llm": 0.13623188405797101
   },
   "t15.2024.07.28": {
    "sentences": 48,
    "phoneme_error": 0.13455882352941176,
    "word_error_dictionary": 0.25245901639344265,
-   "word_error_llm": 0.22295081967213115
+   "word_error_llm": 0.2
   },
   "t15.2025.01.10": {
    "sentences": 23,
    "phoneme_error": 0.27548209366391185,
    "word_error_dictionary": 0.4797687861271676,
-   "word_error_llm": 0.4797687861271676
+   "word_error_llm": 0.4624277456647399
   },
   "t15.2025.01.12": {
    "sentences": 47,
    "phoneme_error": 0.14164742109314857,
    "word_error_dictionary": 0.22818791946308725,
-   "word_error_llm": 0.2181208053691275
+   "word_error_llm": 0.20134228187919462
   },
   "t15.2025.03.14": {
    "sentences": 24,
    "phoneme_error": 0.34615384615384615,
    "word_error_dictionary": 0.5925925925925926,
-   "word_error_llm": 0.5679012345679012
+   "word_error_llm": 0.5740740740740741
   },
   "t15.2025.03.16": {
    "sentences": 24,
    "phoneme_error": 0.2054973821989529,
    "word_error_dictionary": 0.313953488372093,
-   "word_error_llm": 0.27325581395348836
+   "word_error_llm": 0.25
   },
   "t15.2025.03.30": {
    "sentences": 30,
    "phoneme_error": 0.28620689655172415,
    "word_error_dictionary": 0.5147058823529411,
-   "word_error_llm": 0.5
+   "word_error_llm": 0.5098039215686274
   },
   "t15.2025.04.13": {
    "sentences": 25,
    "phoneme_error": 0.23680456490727533,
    "word_error_dictionary": 0.37735849056603776,
-   "word_error_llm": 0.33962264150943394
+   "word_error_llm": 0.3081761006289308
   }
  },
  "data_amount": [
@@ -450,7 +451,7 @@
    "sentences": 508,
    "phoneme_error": 0.18024871014684482,
    "word_error_dictionary": 0.3158947970268725,
-   "word_error_llm": 0.29130931961120643
+   "word_error_llm": 0.2770154373927959
   },
   "approx_by_period": {
    "within_3_months": {
@@ -499,155 +500,175 @@
    }
   }
  },
+ "language_model_methods_val": {
+  "llm_model": "gemini-3.1-flash-lite",
+  "n_sentences": 1426,
+  "methods": {
+   "dictionary": {
+    "word_error": 0.253996823716252,
+    "word_error_ignoring_apostrophes": 0.25230280571731073,
+    "sentences_all_correct": 315,
+    "fell_back_to_dictionary": 0,
+    "outputs_with_an_apostrophe": 336
+   },
+   "candidates": {
+    "word_error": 0.2109052408681842,
+    "word_error_ignoring_apostrophes": 0.2100582318687136,
+    "sentences_all_correct": 477,
+    "fell_back_to_dictionary": 0,
+    "outputs_with_an_apostrophe": 310
+   }
+  }
+ },
  "example_candidates": {
   "one_word_wrong": [
    {
-    "session": "t15.2023.12.10",
-    "block": 7,
-    "trial": 15,
-    "type": "Freq words",
-    "truth": "she will sit across the room",
-    "phonemes": "SH IY | W IH L | S IH T | AH G R AA Z | DH AH | R UW M |",
-    "dictionary": "she will sit agrees the room",
-    "llm": "she will sit agrees the room",
+    "session": "t15.2023.12.29",
+    "block": 4,
+    "trial": 8,
+    "type": "Switchboard",
+    "truth": "i enjoy the news",
+    "phonemes": "AY | EH N JH OY | DH AH | N IY Z |",
+    "dictionary": "i enjoy the knees",
+    "llm": "i enjoy the knees",
     "word_errors_dictionary": 1,
     "word_errors_llm": 1
    },
    {
-    "session": "t15.2023.12.29",
-    "block": 5,
-    "trial": 9,
-    "type": "Freq words",
-    "truth": "my computer is not working anymore",
-    "phonemes": "M AY | K AH M P AH N T | IH Z | N AA T | W ER K IH NG | EH N IY M AO R |",
-    "dictionary": "my company is not working anymore",
-    "llm": "my company is not working anymore",
+    "session": "t15.2024.03.15",
+    "block": 7,
+    "trial": 0,
+    "type": "Switchboard",
+    "truth": "who do they need to trade before the deadline",
+    "phonemes": "HH UW | D UW | DH EY | N IY D | T UW | T R EY D | B IH F AO R | DH AH | D AE D L AH D |",
+    "dictionary": "who do they need to trade before the dallas",
+    "llm": "who do they need to trade before the dallas",
     "word_errors_dictionary": 1,
     "word_errors_llm": 1
    },
    {
     "session": "t15.2023.08.18",
     "block": 7,
-    "trial": 18,
+    "trial": 17,
     "type": "Switchboard",
-    "truth": "he had a hot pad",
-    "phonemes": "HH IY | HH AE D | AH | HH AA T | B AE D |",
-    "dictionary": "he had a hot bad",
-    "llm": "he had a hot bad",
+    "truth": "i'm originally from maine",
+    "phonemes": "AY M | ER IH JH AH N AH L IY | F R AH M | B EY N |",
+    "dictionary": "i'm originally from bain",
+    "llm": "i'm originally from bain",
     "word_errors_dictionary": 1,
     "word_errors_llm": 1
    },
    {
-    "session": "t15.2023.10.22",
-    "block": 9,
-    "trial": 17,
+    "session": "t15.2023.11.03",
+    "block": 6,
+    "trial": 4,
     "type": "Switchboard",
-    "truth": "i don't think it's quite as green",
-    "phonemes": "AY | D OW N T | TH IH NG K | IH T S | K W AY T | AE Z | G R IY T |",
-    "dictionary": "i don't think it's quite as greet",
-    "llm": "i don't think it's quite as great",
+    "truth": "they both cooperate together",
+    "phonemes": "DH EY | B OW TH | K AH K ER P ER IY | T AH G EH DH ER |",
+    "dictionary": "they both akerley together",
+    "llm": "they both akerley together",
     "word_errors_dictionary": 1,
     "word_errors_llm": 1
    }
   ],
   "language_model_fixed_it": [
    {
-    "session": "t15.2023.12.10",
-    "block": 7,
-    "trial": 22,
-    "type": "Freq words",
-    "truth": "some more time in the morning would be nice",
-    "phonemes": "S AH M | M AO R | T AY M | IH N | DH AH | M AO R N IY | W UH D | B IY | N AY S |",
-    "dictionary": "some more time in the chorney would be nice",
-    "llm": "some more time in the morning would be nice",
+    "session": "t15.2024.07.21",
+    "block": 6,
+    "trial": 3,
+    "type": "Switchboard",
+    "truth": "do you have any kids or pets",
+    "phonemes": "D UW | Y UW | HH AE V | EH N IY | K IH D Z | AO R | P EH S |",
+    "dictionary": "do you have any kids or pesce",
+    "llm": "do you have any kids or pets",
     "word_errors_dictionary": 1,
     "word_errors_llm": 0
    },
    {
-    "session": "t15.2023.12.10",
+    "session": "t15.2024.05.10",
     "block": 7,
-    "trial": 8,
-    "type": "Freq words",
-    "truth": "my daughter likes to play outside in the yard",
-    "phonemes": "M AY | D AO T ER | L AY S | T UW | P L EY | AW T S AY D | IH N | DH AH | Y AA R D |",
-    "dictionary": "my daughter leiss to play outside in the yard",
-    "llm": "my daughter likes to play outside in the yard",
+    "trial": 21,
+    "type": "Switchboard",
+    "truth": "i have to be real careful",
+    "phonemes": "AY | HH AE V | T UW | B IY | R IY R | K EH N F ER AH L |",
+    "dictionary": "i have to be here careful",
+    "llm": "i have to be real careful",
+    "word_errors_dictionary": 1,
+    "word_errors_llm": 0
+   },
+   {
+    "session": "t15.2023.12.29",
+    "block": 4,
+    "trial": 24,
+    "type": "Switchboard",
+    "truth": "i think it would work out well",
+    "phonemes": "AY | TH IH NG K | IH T | W AH D | W ER K | AW T | W EH L |",
+    "dictionary": "i think it was work out well",
+    "llm": "i think it would work out well",
     "word_errors_dictionary": 1,
     "word_errors_llm": 0
    },
    {
     "session": "t15.2023.11.26",
     "block": 9,
-    "trial": 13,
+    "trial": 7,
     "type": "Freq words",
-    "truth": "she was supposed to go with me",
-    "phonemes": "SH IY | W AA Z | S AH P OW T | T UW | G OW | W IH DH | M IY |",
-    "dictionary": "she was suppose to go with me",
-    "llm": "she was supposed to go with me",
-    "word_errors_dictionary": 1,
-    "word_errors_llm": 0
-   },
-   {
-    "session": "t15.2023.10.01",
-    "block": 7,
-    "trial": 24,
-    "type": "Switchboard",
-    "truth": "i would work in the summer",
-    "phonemes": "AY | W UH D | W ER K | IH N | DH AH | S AH M B ER |",
-    "dictionary": "i would work in the number",
-    "llm": "i would work in the summer",
+    "truth": "they gave variety of benefits to their employees",
+    "phonemes": "DH EY | G EY V | V ER AY AH T IY | AH V | P EH N AH F IH T S | T UW | DH EH R | IH M P L OY IY AH N Z |",
+    "dictionary": "they gave variety of benefits to there employees",
+    "llm": "they gave variety of benefits to their employees",
     "word_errors_dictionary": 1,
     "word_errors_llm": 0
    }
   ],
   "language_model_made_it_worse": [
    {
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 7,
+    "type": "Switchboard",
+    "truth": "it's hard for me to admit",
+    "phonemes": "IH T S | HH AW N D | F AO R | B IY | T UW | IH N EH N D |",
+    "dictionary": "it's hound for be to intend",
+    "llm": "it's around for to be in the end",
+    "word_errors_dictionary": 3,
+    "word_errors_llm": 6
+   },
+   {
     "session": "t15.2023.11.03",
     "block": 5,
-    "trial": 5,
+    "trial": 8,
     "type": "Harvard",
-    "truth": "the wagon moved on well oiled wheels",
-    "phonemes": "DH AH | W AO K EH N D | M UW D | AA N | W IH L | OY L D | F W IY L Z |",
-    "dictionary": "the weekend mood on will oiled feels",
-    "llm": "the weekend mood made we will old feels",
+    "truth": "place a rosebush near the porch steps",
+    "phonemes": "P L EY S | AH | R AH M B AA CH | Y IH R | DH AH | P AO R T | S EY M Z |",
+    "dictionary": "place a brumbach year the port same's",
+    "llm": "place a room by each year the port seems",
     "word_errors_dictionary": 4,
+    "word_errors_llm": 6
+   },
+   {
+    "session": "t15.2024.07.19",
+    "block": 10,
+    "trial": 0,
+    "type": "Switchboard",
+    "truth": "on the other hand i am quite good",
+    "phonemes": "N | DH AH AW N DH ER | HH EY D | AY | AH | K W AY N T | K L UH D |",
+    "dictionary": "i other hade i a quite could",
+    "llm": "i another hade i quaint cloud",
+    "word_errors_dictionary": 5,
     "word_errors_llm": 7
    },
    {
-    "session": "t15.2023.08.20",
-    "block": 8,
-    "trial": 24,
+    "session": "t15.2023.08.18",
+    "block": 7,
+    "trial": 13,
     "type": "Switchboard",
-    "truth": "there was a voice in her head",
-    "phonemes": "DH EH R | W AA Z | AH | V OY S | IH T | HH ER | HH EH D |",
-    "dictionary": "there was a voice it her head",
-    "llm": "there was a voice it had heard",
-    "word_errors_dictionary": 1,
+    "truth": "was it third of december",
+    "phonemes": "W AA Z | IH T | TH OW D | AH V | D IH S IH P ER |",
+    "dictionary": "was it thode of dearinger",
+    "llm": "was it the code of decipher",
+    "word_errors_dictionary": 2,
     "word_errors_llm": 3
-   },
-   {
-    "session": "t15.2023.10.01",
-    "block": 8,
-    "trial": 18,
-    "type": "Openwebtext",
-    "truth": "the quantity you chose exceeds the quantity available",
-    "phonemes": "DH AH | K W AA N T AH D IY | Y UW | JH UW Z | IH N S IH N T S | DH AH | K W AA N T AH N T IY | EH V AE L AH B AH L |",
-    "dictionary": "the quantity you jews insists the quantity valable",
-    "llm": "the quantified you use insists the quantifiable",
-    "word_errors_dictionary": 3,
-    "word_errors_llm": 5
-   },
-   {
-    "session": "t15.2023.11.19",
-    "block": 4,
-    "trial": 0,
-    "type": "Freq words",
-    "truth": "can we use this for something",
-    "phonemes": "K AE N | W IY | Y UW Z | DH IH S | F AO R | S AH M TH IH NG |",
-    "dictionary": "can we use this for something",
-    "llm": "we can use this for something",
-    "word_errors_dictionary": 0,
-    "word_errors_llm": 2
    }
   ],
   "badly_wrong": [
@@ -671,45 +692,45 @@
     "truth": "pops against idol accurate crop steak",
     "phonemes": "B AE S | AH G EH Z | AY D AH | AH G Y IY AH N D | R AA P | S T EY IH K |",
     "dictionary": "bass again ida agreed raap stick",
-    "llm": "bass again idea agreed ropp stake",
+    "llm": "bass again idea agreed raap stake",
     "word_errors_dictionary": 6,
     "word_errors_llm": 6
    },
    {
-    "session": "t15.2023.11.03",
-    "block": 5,
-    "trial": 5,
-    "type": "Harvard",
-    "truth": "the wagon moved on well oiled wheels",
-    "phonemes": "DH AH | W AO K EH N D | M UW D | AA N | W IH L | OY L D | F W IY L Z |",
-    "dictionary": "the weekend mood on will oiled feels",
-    "llm": "the weekend mood made we will old feels",
-    "word_errors_dictionary": 4,
-    "word_errors_llm": 7
+    "session": "t15.2023.10.13",
+    "block": 6,
+    "trial": 11,
+    "type": "Random",
+    "truth": "grandparents engagement throw stage",
+    "phonemes": "G R EY B EH R AH N Z | IH G K IH N ZH B M AH N | TH L OW | S T EY JH |",
+    "dictionary": "arabians kinman low stage",
+    "llm": "greys barnes kinman slow stage",
+    "word_errors_dictionary": 3,
+    "word_errors_llm": 4
    },
    {
-    "session": "t15.2025.03.14",
-    "block": 4,
-    "trial": 0,
+    "session": "t15.2024.03.17",
+    "block": 7,
+    "trial": 7,
     "type": "Switchboard",
-    "truth": "i hope everything works out up there",
-    "phonemes": "AH | IH T | IY Z S IH NG | ER S | EH T | IH T | D IH R |",
-    "dictionary": "a it easing are et it deer",
-    "llm": "a it easing ers et it deer",
-    "word_errors_dictionary": 7,
-    "word_errors_llm": 7
+    "truth": "it's hard for me to admit",
+    "phonemes": "IH T S | HH AW N D | F AO R | B IY | T UW | IH N EH N D |",
+    "dictionary": "it's hound for be to intend",
+    "llm": "it's around for to be in the end",
+    "word_errors_dictionary": 3,
+    "word_errors_llm": 6
    }
   ],
   "perfect": [
    {
     "session": "t15.2023.12.08",
     "block": 9,
-    "trial": 24,
+    "trial": 23,
     "type": "Freq words",
-    "truth": "they make less money in this season with snow",
-    "phonemes": "DH EY | M EY K | L EH S | M AH N IY | IH N | DH IH S | S IH Z AH N | W IH DH | S N OW |",
-    "dictionary": "they make less money in this season with snow",
-    "llm": "they make less money in this season with snow",
+    "truth": "my wife thinks this is not worth the time",
+    "phonemes": "M AY | W AY F | TH IH NG K S | DH IH S | IH Z | N AA T | W ER TH | DH AH | T AY M |",
+    "dictionary": "my wife thinks this is not worth the time",
+    "llm": "my wife thinks this is not worth the time",
     "word_errors_dictionary": 0,
     "word_errors_llm": 0
    },
@@ -728,12 +749,12 @@
    {
     "session": "t15.2024.03.17",
     "block": 6,
-    "trial": 12,
+    "trial": 4,
     "type": "Switchboard",
-    "truth": "then i heard a very loud explosion",
-    "phonemes": "DH EH N | AY | HH ER D | AH | V EH R IY | L AW T D | IH EH K S P L OW ZH AH N |",
-    "dictionary": "then i heard a very loud explosion",
-    "llm": "then i heard a very loud explosion",
+    "truth": "in other words there is a choice to make",
+    "phonemes": "IH N | AH DH ER | W ER N D Z | DH EH R | IH Z | AH | CH OY S | T UW | M EY K |",
+    "dictionary": "in other words there is a choice to make",
+    "llm": "in other words there is a choice to make",
     "word_errors_dictionary": 0,
     "word_errors_llm": 0
    }
@@ -759,9 +780,9 @@
     "truth": "coming sun york favorite food",
     "phonemes": "K AH M IH NG | S AH N | Y AO R K | F EY V ER IH T | F UW D |",
     "dictionary": "coming sun york favorite food",
-    "llm": "coming son york favorite food",
+    "llm": "coming sun york favorite food",
     "word_errors_dictionary": 0,
-    "word_errors_llm": 1
+    "word_errors_llm": 0
    },
    {
     "session": "t15.2023.10.13",
@@ -771,7 +792,7 @@
     "truth": "pops against idol accurate crop steak",
     "phonemes": "B AE S | AH G EH Z | AY D AH | AH G Y IY AH N D | R AA P | S T EY IH K |",
     "dictionary": "bass again ida agreed raap stick",
-    "llm": "bass again idea agreed ropp stake",
+    "llm": "bass again idea agreed raap stake",
     "word_errors_dictionary": 6,
     "word_errors_llm": 6
    },
@@ -783,9 +804,9 @@
     "truth": "resale telling serious understanding moral",
     "phonemes": "V IY S IY L | T AY L IH NG | S IH R IY R | AH N D ER S T AE N T IH NG | M AO R L |",
     "dictionary": "reseal telling series understanding more",
-    "llm": "reseal telling series understanding moral",
+    "llm": "reseal typing series understanding more",
     "word_errors_dictionary": 3,
-    "word_errors_llm": 2
+    "word_errors_llm": 4
    }
   ]
  }

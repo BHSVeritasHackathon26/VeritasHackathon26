@@ -511,7 +511,8 @@ Val is the held-out test set. None of these was used to choose a model or a sett
 
 | Model | When | Decoders | Phonemes | Words (dictionary) | Words (Gemini) |
 |---|---|---|---|---|---|
-| Run A, 120,000 batches (final model) | Sat night | both | 13.7% | 25.4% | 23.1% |
+| Run A, 120,000 batches (final model) | Sat night | both, Gemini 3.5 | 13.7% | 25.4% | 23.1% |
+| Run A, same phonemes, Gemini 3.1 (headline) | Sun 2 PM | both, Gemini 3.1 | 13.7% | 25.4% | 21.1% |
 | Linear baseline | Sat night | both | 63.5% | 97.0% | 92.2% |
 | Data-amount run, 10% | Sun morning | dictionary | 38.5% | 59.7% | - |
 | Data-amount run, 25% | Sun morning | dictionary | 26.9% | 45.0% | - |
@@ -520,7 +521,9 @@ Val is the held-out test set. None of these was used to choose a model or a sett
 | 80,000-batch run | Sun morning | dictionary | 14.3% | 26.4% | - |
 
 Run A was fixed as the final model on Saturday night, before any Sunday val score
-existed, and nothing was changed afterwards because of them.
+existed, and the neural network was not changed afterwards. One choice was made on
+Sunday: which Gemini model the decoder uses. It was made on tune (14.8% vs 17.0%)
+and then scored once on val.
 
 Housekeeping note (Sun midday): `results/linear_val.json` was overwritten when the
 baseline was re-scored on val without the language model, which removed its Gemini
@@ -625,9 +628,25 @@ sentences match Saturday's file). The only difference is the Gemini model:
 Sentence by sentence, 3.1 was better on 125, worse on 44, the same on 639. Some of
 the gap may be run-to-run randomness in the language model; we ran each once.
 
-- Decision (made on tune): TODO. If we switch to 3.1, score val once with
-  `python -m b2t.llm_compare --run runs/run_a --split val --methods candidates
-  --llm-model gemini-3.1-flash-lite` and report it beside Saturday's 23.1%.
+- **Decision (made on tune, Sun about 1:45 PM): switch the language model to Gemini
+  3.1 Flash Lite.** The decoding method is unchanged (dictionary candidates); only
+  the Gemini model differs. We then scored val once:
+
+  | Val, 1,426 held-out sentences | Word error | Fully correct |
+  |---|---|---|
+  | Dictionary only, no language model | 25.4% | 315 |
+  | Candidates + Gemini 3.5 Flash Lite (Saturday) | 23.1% | 406 |
+  | **Candidates + Gemini 3.1 Flash Lite (Sunday, our headline)** | **21.1%** | **477** |
+
+  The 2.0-point gain on val matches the 2.2-point gain on tune. We checked that all
+  1,426 phoneme sequences and dictionary sentences are identical to Saturday's file,
+  and no sentences fell back.
+- Files: `results/llm_compare_run_a_val.json` is the run itself.
+  `results/run_a_val_gemini31.json` is the official results file, in the standard
+  layout: Saturday's phonemes and dictionary sentences with the 3.1 language-model
+  sentences. `results/run_a_val.json` is Saturday's file, unchanged, with the 3.5
+  sentences. The analysis script uses the official file. The demo app still reads
+  Saturday's file.
 
 ### Graphs (latest versions)
 All made by `python -m b2t.analyze`, which re-draws every graph from the files in
@@ -663,7 +682,55 @@ All made by `python -m b2t.analyze`, which re-draws every graph from the files i
 **Accuracy after training stops** (drift experiment; val sentences of the 15 later sessions)
 ![Drift](../figures/drift.png)
 
-### Analysis of Run A on val (Sun morning)
+### HEADLINE RESULT (final model, held-out val sentences)
+Run A (GRU, 120,000 batches) + dictionary candidates + Gemini 3.1 Flash Lite, on
+1,426 sentences never used for training or for any choice:
+
+| | Linear baseline | Our model |
+|---|---|---|
+| Phoneme error | 63.5% | **13.7%** |
+| Word error, dictionary decoder | 97.0% | **25.4%** |
+| Word error, language-model decoder | 92.2% (Gemini 3.5) | **21.1%** (Gemini 3.1) |
+| Sentences with every word right | not counted | 477 of 1,426 (33%) |
+
+The baseline's language-model figure was measured with Gemini 3.5 Flash Lite on
+Saturday; we did not have the request allowance to re-score it with 3.1.
+Published reference: the dataset authors' baseline scores 10.1% phoneme error on
+this same val set.
+
+**Updated breakdowns with the official (Gemini 3.1) sentences.** "Words" = word
+error with the language-model decoder. Phoneme and dictionary numbers are unchanged
+from the Saturday analysis below.
+
+| Kind of sentence | In training? | Sentences | Phonemes | Words (dictionary) | Words (language model) |
+|---|---|---|---|---|---|
+| Frequent-word sentences | yes | 225 | 8.1% | 15.4% | 11.0% |
+| Everyday conversation | yes | 1,037 | 14.1% | 25.3% | 21.3% |
+| Written web text | no | 80 | 17.8% | 33.5% | 27.5% |
+| Harvard sentences | no | 45 | 17.0% | 38.9% | 30.6% |
+| Random word lists | no | 39 | 21.6% | 53.0% | 52.5% |
+
+- Kinds seen in training: 19.3% words. Kinds never seen in training: 32.3%.
+- Random word lists: the language model still does nothing (53.0% -> 52.5%). On
+  every other kind it now helps by 4 to 8 points.
+
+| Sentence length | Sentences | Words (dictionary) | Words (language model) |
+|---|---|---|---|
+| 1-3 words | 73 | 32.2% | 29.7% |
+| 4-6 | 646 | 24.9% | 21.1% |
+| 7-9 | 575 | 25.0% | 20.3% |
+| 10-12 | 124 | 27.2% | 22.6% |
+| 13+ | 8 | 22.5% | 19.8% |
+
+- The language model helps least on the shortest sentences (2.5 points) and most
+  on 7-9 word sentences (4.7 points): more words give it more context.
+- Wording also in training: 25.0% words. New wording: 20.6%. Repeated wording is
+  still harder, not easier.
+- Against the dictionary decoder, the language model improved 366 sentences, made
+  48 worse and left 1,012 the same. Total wrong words 2,399 -> 1,992.
+
+### Analysis of Run A on val with Saturday's Gemini 3.5 sentences (superseded for
+### language-model numbers; kept as the record of what we first measured)
 From `python -m b2t.analyze`, which reads the saved predictions and writes graphs to
 `figures/` and every number to `results/analysis.json`. All on the 1,426 held-out
 val sentences. "Words" below means word error with the language-model decoder.

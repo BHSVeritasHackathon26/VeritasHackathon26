@@ -145,7 +145,9 @@ def session_day(session):
 
 def main():
     out = {}
-    val = load("run_a_val.json")
+    # The official val file: language-model sentences from the Gemini model we chose
+    # on tune (3.1 Flash Lite). Falls back to Saturday's file (3.5 Flash Lite).
+    val = load("run_a_val_gemini31.json") or load("run_a_val.json")
     tune = load("run_a_tune.json")
     base_val = load("linear_val.json")
     run_a = load("run_a_run.json")
@@ -154,7 +156,8 @@ def main():
         raise SystemExit("results/run_a_val.json not found; nothing to analyse.")
     rows = add_edits(val["sentences"])
     out["run_a_val_overall"] = rates(rows)
-    print(f"Run A on val: {len(rows)} sentences")
+    out["run_a_val_llm_model"] = val.get("llm_model")
+    print(f"Run A on val: {len(rows)} sentences, language model {val.get('llm_model')}")
 
     # ---- Baseline against our model, on the same held-out sentences ----
     if base_val:
