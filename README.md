@@ -15,6 +15,8 @@ We built a model to interpret neural signals from someone's brain into intended 
 Using BCI (brain computer interfaces), it is possible to receive information about neural firings in specific parts of the brain. This data acts as the input for our model. Our model outputs predicted phonemes, which can then be converted into real English words and sentences.
 > A phoneme is the smallest unit of spoken sound in a language. We are using the 39 phonemes of American English (the language our data is for), plus a silence marker between words and a "blank", for 41 classes in total.
 
+We used Card et al.'s public dataset and approach, but trained our own model using our own code and device. We also used different data splits to best fit our approach. Our biggest difference from the Card et al. lab was the questions we chose to ask and how we decided to answer them.
+
 ## How it works
 ![Diagram of how the model works](https://raw.githubusercontent.com/Neuroprosthetics-Lab/nejm-brain-to-text/main/b2txt_methods_overview.png)\
 *Figure 1: Image from the lab's GitHub repository (see [Sources](#Sources))*
