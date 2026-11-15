@@ -203,4 +203,4 @@ As always, our model can definitely be improved. Another possible course of acti
 Libraries: PyTorch, NumPy, h5py, cmudict, google-genai, matplotlib
 
 ## AI tools used
-- Claude Code (Claude Fable 5.2, Anthropic): project planning, explanations, and helping write the code in `b2t/`
+- [Claude Code](https://claude.com/product/claude-code) (Claude Fable 5.2, Anthropic): project planning, explanations, and helping write the code in `b2t/`
