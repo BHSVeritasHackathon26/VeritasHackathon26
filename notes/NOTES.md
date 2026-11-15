@@ -375,7 +375,46 @@ recalibrate, and how much would it take?
   is easier or harder sentences, not drift. Each session has only 23 to 48 val
   sentences, so single points are noisy. The recalibration settings (200 steps,
   learning rate 0.001) are a first guess and untuned. One participant only.
-- Results: TODO.
+- **Results (Sun early afternoon).** The drift model itself trained to 10.5% tune
+  phoneme error on its own 27 sessions. On the 15 later sessions with val sentences
+  (508 sentences), all together:
+
+  | Condition | Phoneme error | Word error (dictionary) |
+  |---|---|---|
+  | No recalibration | 63.3% | 90.0% |
+  | Recalibrated on 10 sentences | 46.3% | 71.0% |
+  | Recalibrated on 50 sentences | 31.4% | 52.1% |
+  | For reference: Run A, which trained on these sessions | 18.0% | 31.6% |
+
+  - Without recalibration the model is about as bad as the linear baseline (63.5%
+    on val): two or more months after training, it is close to useless as it stands.
+  - Recalibrating only the small per-session input layer recovers a lot: 10
+    sentences cut phoneme error by 17 points, 50 sentences by 32 points.
+  - It does not recover everything. 50 sentences gets to 31.4%, against 18.0% for a
+    model that trained fully on those sessions. More sentences, tuned settings, or
+    updating the shared network as well might close the gap; we did not test those.
+  - **Against time** (graph: `figures/drift.png`; per-session numbers in
+    `results/drift_drift.json`). Phoneme error with no recalibration:
+    - 1.9 months after training (the first later session): 33.6%
+    - 2.3 to 2.6 months (three sessions): 49.5% to 57.0%
+    - 4.4 to 7.0 months (five sessions): 59.6% to 73.4%
+    - 12.4 to 15.5 months (six sessions): 69.9% to 76.6%
+
+    So most of the damage happens early: within about two and a half months the
+    model has gone from usable to roughly half its phonemes wrong, and after that it
+    keeps getting worse more slowly.
+  - **Recalibration helps at every age but less as time passes.** Pooled over
+    sessions within 3 months: 49.1% -> 36.8% (10 sentences) -> 28.7% (50). Pooled
+    over sessions more than 12 months out: 73.3% -> 59.6% -> 39.6%. The older the
+    model, the more of the change is beyond what one small input layer can absorb.
+  - **Not all the session-to-session wobble is drift.** Run A, which trained on these
+    sessions, also varies from 8.3% to 34.5% across them, and the four lines on the
+    graph rise and fall together. Some sessions simply have harder sentences.
+  - **Practical reading:** a user would need to recalibrate at least every month or
+    two, 50 sentences (a few minutes of attempted speech) gets back most but not all
+    of the lost accuracy, and after a year the shared network needs retraining too.
+  - Caveats as listed above: untuned recalibration settings, 23 to 48 val sentences
+    per session, one participant.
 
 ### How often the model sees each sentence
 - Run A: 120,000 batches x 32 sentences = 3.84 million showings of 7,264 sentences,
@@ -488,7 +527,9 @@ the earlier file.
 - [x] Data-amount results recorded (34.5 / 22.7 / 16.5 / 13.2%)
 - [x] Data-amount graph made; 80,000-batch result recorded (11.0%)
 - [x] Data-amount runs' val scores recorded
-- [ ] Train the drift model (`runs/drift`), run `b2t.drift`, record results, make the graph
+- [x] Drift model trained, experiment run, results recorded, graph made
+- [x] Final audit run on the Linux box Sun 12:19 PM ET: all checks passed; the report
+      lists every model, with the drift model on 27 of 45 sessions
 - [x] Final model: Run A (short). Val scored Sat night
 - [ ] Breakdowns and graphs (see questions below)
 - [ ] Demo app
@@ -544,7 +585,8 @@ All made by `python -m b2t.analyze`, which re-draws every graph from the files i
 **Error by sentence length** (Run A, val)
 ![Error by sentence length](../figures/error_by_sentence_length.png)
 
-Still to come: `figures/drift.png`, once the drift experiment has run.
+**Accuracy after training stops** (drift experiment; val sentences of the 15 later sessions)
+![Drift](../figures/drift.png)
 
 ### Analysis of Run A on val (Sun morning)
 From `python -m b2t.analyze`, which reads the saved predictions and writes graphs to

@@ -408,6 +408,8 @@ def main():
     # ---- Drift experiment ----
     for path in sorted(RESULTS.glob("drift_*.json")):
         d = json.loads(path.read_text())
+        if "per_session" not in d:  # e.g. drift_run.json, the drift model's training record
+            continue
         out["drift"] = {"summary": d["summary"], "last_training_session": d["last_training_session"]}
         print(f"\nDrift experiment ({path.name}), all later sessions together")
         for s in d["summary"]:
@@ -416,6 +418,24 @@ def main():
         fig, ax = new_chart("Accuracy after training stops",
                             f"Model trained on sessions up to {session_day(d['last_training_session'])}, "
                             "tested on each later session's held-out sentences.", size=(8, 4.4))
+        # Reference: our final model, which trained on these later sessions too.
+        tested = {r["session"]: r["days_since_training"] for r in d["per_session"]}
+        ref = sorted((days / 30.44, 100 * by_session[s]["phoneme_error"])
+                     for s, days in tested.items() if s in by_session)
+        if ref:
+            ax.plot([p[0] for p in ref], [p[1] for p in ref], color=MUTED, linewidth=2, marker="o",
+                    markersize=5, markeredgecolor=SURFACE, markeredgewidth=1.2,
+                    label="Model trained on these sessions too (Run A)")
+            ref_rows = [r for r in rows if r["session"] in tested]
+            out["drift"]["run_a_on_same_sessions"] = rates(ref_rows)
+        early = [r for r in d["per_session"] if r["days_since_training"] <= 90]
+        late = [r for r in d["per_session"] if r["days_since_training"] > 365]
+        def pooled(group, n):
+            g = [r for r in group if r["n_sentences"] == n]
+            return sum(r["phoneme_error_rate"] * r["n_val_trials"] for r in g) / max(1, sum(r["n_val_trials"] for r in g))
+        out["drift"]["approx_by_period"] = {
+            "within_3_months": {str(n): pooled(early, n) for n in sorted({r["n_sentences"] for r in early})},
+            "after_12_months": {str(n): pooled(late, n) for n in sorted({r["n_sentences"] for r in late})}}
         sizes = sorted({r["n_sentences"] for r in d["per_session"]})
         for n, colour in zip(sizes, (SECOND, THIRD, OURS)):
             pts = sorted((r["days_since_training"] / 30.44, 100 * r["phoneme_error_rate"])
@@ -425,7 +445,9 @@ def main():
                     markersize=6, markeredgecolor=SURFACE, markeredgewidth=1.2, label=name)
         ax.set_xlabel("months since the last training session", color=INK_SOFT, fontsize=9)
         percent_axis(ax, "phoneme error rate")
-        legend_below(ax)
+        ax.legend(frameon=False, fontsize=9, labelcolor=INK_SOFT, loc="upper center",
+                  bbox_to_anchor=(0.5, -0.2), ncols=2)
+        ax.set_ylim(0, 90)
         save(fig, "drift.png")
 
     # ---- Candidate examples for the write-up ----
