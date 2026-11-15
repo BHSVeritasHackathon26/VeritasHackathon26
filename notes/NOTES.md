@@ -8,8 +8,16 @@ go at the bottom. This feeds the write-up (results, what didn't work, sources).
 ### Project decision
 - Goal: decode attempted speech from neural recordings into English text, for people
   with motor speech disabilities.
-- Track: TODO (leaning AI + Languages: "help people ... be understood").
-- User: TODO, name one specific person and the moment they would use it.
+- Track: **AI + Languages** (decided Sat night). The challenge is to help people
+  "be understood", which is what the project is for, and its required evidence
+  (model output beside the correct output, results broken down by group) is what
+  our evaluation already produces. AI + Health asks for missed cases and false
+  alarms and for equal performance across groups, which do not fit a
+  one-participant sentence decoder. We still include the "not medical advice" line.
+- User (provisional, Sat night; we may reword it): an adult with ALS who can no
+  longer speak clearly, at the moment they want to tell a family member or carer
+  something. Input: neural activity recorded while they attempt to speak. Output:
+  the sentence as text.
 
 ### Data
 - Brain-to-Text '25 dataset, participant T15, 45 recording sessions (Aug 2023 to Apr 2025).
@@ -349,7 +357,7 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
 ### What the hackathon asks every project to show
 | Requirement | Where we stand |
 |---|---|
-| Who is it for? One specific user and moment | TODO: decide |
+| Who is it for? One specific user and moment | provisional: an adult with ALS telling a family member or carer something |
 | A real input producing a result | pipeline works end to end; demo app not built |
 | Beats a simple baseline | baseline measured (61.1% phoneme, 95.2% / 89.7% word); Run A scores pending |
 | Where does it fail? At least one example with a reason | baseline examples saved in `results/`; need Run A examples |
@@ -384,6 +392,27 @@ size 32 (about 1.85 hours each). All four are scored on the same 808 tune senten
 - [ ] Decide track and named user
 - [ ] Write-up, video, submit (deadline Sunday 11:59 PM ET; aim to submit hours early)
 
+### Sentence types in the dataset (from the authors' block table, Sat night)
+Counts are sentences per the authors' table, for val and test together (the table
+does not separate the two).
+
+| Sentence type | In training blocks | In val/test blocks |
+|---|---|---|
+| Switchboard (everyday conversation) | 5,533 | 2,139 |
+| Frequent-word sentences | 1,610 | 440 |
+| 50-word vocabulary | 1,091 | 0 |
+| OpenWebText (written web text) | 0 | 172 |
+| Harvard sentences | 0 | 98 |
+| Random word sequences | 0 | 79 |
+
+- Three types appear only in val/test and never in training: OpenWebText, Harvard
+  and random words. Tune is cut from training blocks, so tune has none of them.
+- This is probably part of why val scores are worse than tune scores (13.7% vs
+  10.4% phonemes): val contains kinds of sentence the model was never trained on.
+  Not yet measured; the per-type breakdown of `results/run_a_val.json` will show it.
+- Random-word and Harvard samples in val will be small (a few dozen sentences
+  each), so those per-type numbers will be noisy.
+
 ### Questions we asked ourselves along the way
 Notes to ourselves; not answered yet. Each one should end up as a short answer, and
 where marked, a graph.
@@ -405,8 +434,9 @@ Where the evidence for each will come from (not answers):
 - 3: `b2t/train.py` (the `DEFAULTS` table) and each run's `run.json`.
 - 4: the per-sentence predictions saved in `results/*.json` by `b2t.evaluate`.
 - 5: the same files, plus the dataset authors' list of which block used which kind
-  of sentence (`data/t15_copyTaskData_description.csv` in their GitHub repo), which
-  we have not downloaded yet.
+  of sentence (`data/t15_copyTaskData_description.csv` in their GitHub repo).
+  Downloaded Sat night to `external/authors_repo/` (not committed: their repo has
+  no licence file). It lists 264 blocks: 198 train, 67 val/test, matching our audit.
 
 ### Hardware
 - Training: Linux desktop, GeForce RTX 2080 Ti (11 GB), 64 GB RAM.
