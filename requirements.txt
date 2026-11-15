@@ -3,3 +3,4 @@ h5py
 torch
 cmudict
 google-genai
+matplotlib

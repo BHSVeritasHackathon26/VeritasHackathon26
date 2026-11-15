@@ -5,3 +5,5 @@ __pycache__/
 venv/
 runs/
 cache/
+.claude/
+external/

@@ -468,6 +468,60 @@ does not separate the two).
 - Random-word and Harvard samples in val will be small (a few dozen sentences
   each), so those per-type numbers will be noisy.
 
+### Analysis of Run A on val (Sun morning)
+From `python -m b2t.analyze`, which reads the saved predictions and writes graphs to
+`figures/` and every number to `results/analysis.json`. All on the 1,426 held-out
+val sentences. "Words" below means word error with the language-model decoder.
+
+**By kind of sentence** (graph: `figures/error_by_sentence_type.png`)
+
+| Kind | In training? | Sentences | Phonemes | Words |
+|---|---|---|---|---|
+| Frequent-word sentences | yes | 225 | 8.1% | 13.4% |
+| Everyday conversation (Switchboard) | yes | 1,037 | 14.1% | 22.9% |
+| Written web text (OpenWebText) | no | 80 | 17.8% | 30.6% |
+| Harvard sentences | no | 45 | 17.0% | 38.6% |
+| Random word lists | no | 39 | 21.6% | 52.5% |
+
+- Kinds seen in training: 12.9% phonemes, 21.1% words (1,262 sentences). Kinds never
+  seen in training: 18.4% phonemes, 36.4% words (164 sentences).
+- This explains part of the tune-to-val gap but not all of it: tune is 10.4%
+  phonemes, and val sentences of the kinds seen in training are still 12.9%.
+- Random word lists are worst, and the language model barely helps there (53.0% ->
+  52.5%): with no meaning to lean on, context cannot fix anything. This answers
+  question 5 below. Only 39 sentences, so the exact figure is rough.
+- Even the phoneme error is higher on unseen kinds, so the neural network itself,
+  not just the decoder, has picked up what kinds of sentence to expect.
+
+**By sentence length** (graph: `figures/error_by_sentence_length.png`)
+- 1-3 words: 31.7% words (73 sentences). 4-6: 22.5%. 7-9: 22.6%. 10-12: 25.6%.
+  13+: 20.7% (only 8 sentences).
+- Very short sentences are the hardest, and the language model does almost nothing
+  for them (32.2% -> 31.7%): there is too little context. Between 4 and 12 words,
+  length makes little difference. This answers question 4 below.
+
+**Wording seen in training** (the 162 val sentences whose text also appears in training)
+- Repeated wording: 16.5% phonemes, 26.1% words. New wording: 13.4%, 22.7%.
+- The repeated sentences did WORSE, not better, so the model is not benefiting from
+  having seen the text. We do not know why they are harder (possibly which sessions
+  or sentence kinds they come from). Not investigated.
+
+**What the language-model decoder changes**
+- Compared with the dictionary decoder it improved 263 sentences, made 71 worse and
+  left 1,092 the same. Total wrong words: 2,399 -> 2,184.
+- Sentences with every word right: 315 -> 406 of 1,426 (28%).
+- Sentences with every phoneme right: 222.
+
+**Example failures to choose from** (more in `results/analysis.json`)
+- Sounds alike, both make sense: "she will sit across the room" -> "... agrees ...";
+  "my computer is not working anymore" -> "my company ..."; "he had a hot pad" ->
+  "... hot bad".
+- Language model fixed it: "some more time in the chorney would be nice" ->
+  "... in the morning ..."; "i would work in the number" -> "... the summer".
+- Language model made it worse: "can we use this for something" (dictionary had it
+  right) -> "we can use this for something".
+- Random words: "first terror slips done" -> "first bearer keeps done".
+
 ### Questions we asked ourselves along the way
 Notes to ourselves; not answered yet. Each one should end up as a short answer, and
 where marked, a graph.
