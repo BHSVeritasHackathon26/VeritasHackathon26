@@ -36,11 +36,12 @@ go at the bottom. This feeds the write-up (results, what didn't work, sources).
 |---|---|---|---|---|---|
 | linear | one linear layer + CTC, 293,929 parameters | all 45 | 5,000 | 61.1% | simple baseline; 14.1 batches/s |
 | run_a | GRU, 5 layers x 768 units, 44.3M parameters | all 45 | 120,000 at batch size 32 | TODO | first attempt (60,000 at batch size 64, 3.4-3.5 batches/s) ran out of memory; see below |
-| run_b | same GRU | 39 (2025 held out) | 40,000 | TODO | for the calibration experiment |
-| run_a_long | same GRU | all 45 | 120,000 | TODO | the reference recipe's full length |
+| run_b | same GRU | 39 (2025 held out) | 80,000 at batch size 32 (planned, overnight) | TODO | for the calibration experiment; about 3.7 hours |
+| run_a_long | same GRU | all 45 | 180,000 at batch size 32 (planned, overnight) | TODO | same model as run_a trained 50% longer; about 8.3 hours. The authors' full length would be 240,000 at this batch size (about 11 hours), which we trimmed to free the GPU by Sunday morning |
 
 Run A progress on tune (batch size 32): 36.2% at batch 4,000, 23.1% at 8,000,
-13.2% at 24,000. About 6.0 batches/s.
+13.2% at 24,000. About 6.0 batches/s. These are tune scores taken during training,
+so the final figure will be the best of them, not necessarily the last.
 
 ### Dictionary decoder, tested on damaged true phonemes (Sat afternoon)
 Not a model result: we took the true phonemes of 300 tune sentences, added random
@@ -73,8 +74,17 @@ errors on purpose, and decoded with the CMU dictionary (`python -m b2t.decode_ch
 
 - With about 6 in 10 phonemes wrong, almost no words survive: the decoders cannot
   rescue a model this weak. The language model helped a little (91.6% -> 84.0%).
-- This is the end-to-end number for our simple baseline. TODO: rerun on all 808 tune
-  sentences so it is comparable with Run A.
+- That 20-sentence run used Gemini 4 Hydrogen, whose free tier allows only 20
+  requests a day. We switched to Gemini 3.5 Flash Lite (500 a day) for everything after.
+
+**Full baseline result, all 808 tune sentences** (Gemini 3.5 Flash Lite, Sat evening).
+This is the baseline row to compare Run A against.
+
+| Stage | Error rate |
+|---|---|
+| Phoneme error rate (model alone) | 61.1% |
+| Word error rate, dictionary decoder | 95.2% |
+| Word error rate, language-model decoder | 89.7% (0 sentences fell back) |
 
 Reference point: the dataset authors report 10.1% phoneme error rate on val for their
 baseline, trained for 120,000 batches.
@@ -138,6 +148,105 @@ baseline, trained for 120,000 batches.
     input sizes, not just a tiny example.
 - TODO, add more as they happen.
 
+### How the whole system works, in plain words
+For the write-up's "How it works" section and for explaining to judges.
+
+1. **Input.** One sentence's recording: every 20 ms, 512 numbers describing neural
+   activity near 256 electrodes in the part of the brain that controls speech movements.
+2. **Smoothing and windows.** The signal is smoothed over time and cut into
+   overlapping 280 ms windows, one every 80 ms. (`b2t/models.py`, `Frontend`)
+3. **Per-session layer.** Each recording day has its own small layer that re-maps
+   that day's signals into a common form. This is the personal part. (`SessionLayers`)
+4. **Shared recurrent network (GRU).** Carries a memory through the sentence and
+   outputs, for each window, a score for each of 41 classes: 39 phonemes, a silence
+   marker between words, and "blank" (nothing new). (`GRUDecoder`)
+5. **Reading out phonemes.** Take the top class per window, merge repeats, drop
+   blanks. (`greedy_decode` in `b2t/train.py`)
+6. **Phonemes to words, option 1.** Cut at the silence markers and look each chunk
+   up in the CMU Pronouncing Dictionary by closest match. (`b2t/decode.py`)
+7. **Phonemes to words, option 2.** Give Gemini each chunk plus the dictionary's
+   five closest words and ask for the most likely sentence. (`b2t/llm_decode.py`)
+
+Training (`b2t/train.py`) uses CTC loss, which lets the model learn the phoneme
+sequence without being told when each phoneme happened. See `CTCLossFunction.md`.
+
+Personal vs shared, for the "retrain for anyone" claim:
+
+| Part | Personal or shared | For a new person |
+|---|---|---|
+| Config file (`configs/t15.toml`) | personal | write a new one |
+| Per-session input layers | personal | train fresh ones |
+| GRU and output layer | shared | reuse, or fine-tune |
+| Phoneme list | universal | reuse |
+| Dictionary and language model | universal | reuse |
+
+### Glossary
+- **Phoneme:** a basic speech sound. "Cat" is three: K, AE, T.
+- **Trial:** one attempted sentence and its recording.
+- **Session:** one recording day. There are 45.
+- **Batch:** a group of sentences the model learns from in one step (ours: 32).
+- **Loss:** a number for how wrong the model was on a batch; training pushes it down.
+- **CTC:** the loss function we use; handles not knowing when each phoneme occurred.
+- **GRU:** a recurrent neural network layer, one that keeps a memory through time.
+- **Phoneme error rate:** edits needed to turn predicted phonemes into the true ones,
+  divided by the number of true phonemes. Scores the neural network alone.
+- **Word error rate:** the same idea counted in words. Scores the whole system.
+  Both can exceed 100%. Lower is better.
+- **Baseline:** the simplest reasonable model, there to be beaten.
+- **train / tune / val:** learn from / check progress and choose settings / final test.
+- **Augmentation:** small random changes to training data so the model can't memorise it.
+- **Overfitting:** doing well on training data but worse on unseen data.
+- **Calibration:** adapting the model to a new day or person with a little of their data.
+
+### Limits to state honestly in the write-up
+- One participant only. "Retrainable for anyone" is a design goal; we tested
+  adapting to unseen days from the same person, not to a new person.
+- It decodes attempted speech from a brain area that controls speech movements. It
+  does not read thoughts, and it needs surgically implanted electrodes.
+- Sentences were prompted (the participant copied text shown to them). Free
+  conversation may be harder.
+- 162 of 1,426 val sentences repeat wording seen in training; report them separately.
+- Our runs are shorter than the dataset authors' and use half their batch size, on
+  an 11 GB GPU, so we expect to score worse than their 10.1%.
+- The language-model decoder depends on an outside service (Gemini), so text derived
+  from brain data leaves the device. A real product would need a local model.
+- A language model can "fix" a sentence into something more normal than what was
+  said. Random-word sentences are where to look for this.
+- All tune-split numbers were used to make choices; only val numbers are a clean test.
+- Required line: "This project is a prototype and is not medical advice." (if we
+  submit under AI + Health).
+
+### What the hackathon asks every project to show
+| Requirement | Where we stand |
+|---|---|
+| Who is it for? One specific user and moment | TODO: decide |
+| A real input producing a result | pipeline works end to end; demo app not built |
+| Beats a simple baseline | baseline measured (61.1% phoneme, 95.2% / 89.7% word); Run A scores pending |
+| Where does it fail? At least one example with a reason | baseline examples saved in `results/`; need Run A examples |
+| Results from data the model did not see | val untouched so far; score it once at the end |
+| "What we added" beyond a tutorial | our own question: how much data does a new day need (calibration experiment) |
+| Sources and AI tools cited | lists at the bottom of this file |
+
+### Gemini usage
+- Model for all reported results: `gemini-3.5-flash-lite` (free tier: 15 requests per
+  minute, 500 per day). `gemini-3.1-flash-lite` has the same limits as a backup.
+- We send 10 sentences per request. 808 tune sentences is about 81 requests; 1,426 val
+  sentences is about 143.
+- Answers are cached in `cache/llm/` on the Linux box, so re-running the same
+  predictions costs no requests.
+- Never put the API key in the repo; it is public.
+
+### Still to do
+- [ ] Run A: record final tune score; score end to end on tune with both decoders
+- [ ] Start overnight runs (run_b, then run_a_long)
+- [ ] Copy `run.json` files into `results/` and push from the Linux box
+- [ ] Calibration experiment with run_b (code not written yet)
+- [ ] Choose final model; score once on val
+- [ ] Breakdowns and graphs (see questions below)
+- [ ] Demo app
+- [ ] Decide track and named user
+- [ ] Write-up, video, submit (deadline Sunday 11:59 PM ET; aim to submit hours early)
+
 ### Questions we asked ourselves along the way
 Notes to ourselves; not answered yet. Each one should end up as a short answer, and
 where marked, a graph.
@@ -152,6 +261,15 @@ where marked, a graph.
 4. **Sentence length vs performance.** Create a graph.
 5. **Do nonsensical sentences vs sentences with proper grammar make a difference?**
    Create a graph.
+
+Where the evidence for each will come from (not answers):
+- 1: `python -m b2t.check configs/t15.toml` and the Data section above.
+- 2: the calibration experiment with run_b (error vs number of calibration sentences).
+- 3: `b2t/train.py` (the `DEFAULTS` table) and each run's `run.json`.
+- 4: the per-sentence predictions saved in `results/*.json` by `b2t.evaluate`.
+- 5: the same files, plus the dataset authors' list of which block used which kind
+  of sentence (`data/t15_copyTaskData_description.csv` in their GitHub repo), which
+  we have not downloaded yet.
 
 ### Hardware
 - Training: Linux desktop, GeForce RTX 2080 Ti (11 GB), 64 GB RAM.
