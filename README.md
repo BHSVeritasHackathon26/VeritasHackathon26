@@ -1,4 +1,4 @@
-# Though-to-Text
+# Thought-to-Text
 **Track:** AI + Languages
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
@@ -14,18 +14,34 @@ Using BCI (brain computer interfaces), it is possible to receive information abo
 > A phoneme is the smallest unit of spoken sound in a language. We are using a 41 phoneme set of sounds for American English, which is what our data is for.
 
 ## How it works
-![Diagram of how the model works](https://raw.githubusercontent.com/Neuroprosthetics-Lab/nejm-brain-to-text/main/b2txt_methods_overview.png)\\
+![Diagram of how the model works](https://raw.githubusercontent.com/Neuroprosthetics-Lab/nejm-brain-to-text/main/b2txt_methods_overview.png)\
 *Figure 1: Image from the lab's GitHub repository (see [Sources](#Sources))*
 
 Neural firing information is processed into "bins" of 20ms, each bin measuring neural data for all neurons that were recorded (four implanted microelectrode arrays, each measuring 3.2mm by 3.2mm and containing 64 electrodes, each with a 50 micrometer recording site). Every 80ms, we used a 280ms of past and future information to predict the sound the person was tyring to make during those 80ms. Passing the information from the bins allows us to create a distribution graph over that 80ms time span of our predicted sound.
 
 Those sounds are processed as phomenes, which we then converted into English text.
 
-The full process can be seen in Figure 1
+The full process can be seen in Figure 1.
+
+## Process
+First, we trained a very basic and rudimentary linear model in about 20 minutes to set a baseline for our prediction. Next, we trained a more advanced model with more data, which took about 5 and a half hours. This model did XXX better than the linear model in addition to having a larger dataset to train on. After that, we trained a very similar model with even more data (all the data we had). This took around X hours to train, which ran over Saturday night. Even across days, people might have differing patterns in neural signals, and our model has to be able to adapt to that. For this, we trained one final model, leaving out 6 random days (out of 45 total days of data) from the training to see how the model would adapt to a new day.
 
 ## Results
-Our baseline scored X. Our model scored Y on held-out test data.
-Where it fails, and why we think so.
+Our baseline linear model had a PER (phoneme error rate) of about 61%.
+
+<EXAMPLE OF SENTENCE TRANSLATED BY MODEL>
+
+Our second model (nicknamed model A-short) had a PER of about 10.4%.
+
+<EXAMPLE OF SENTENCE TRANSLATED BY MODEL>
+
+Our third model (nicknamed model A-long) had a PER of about XX%.
+
+<EXAMPLE OF SENTENCE TRANSLATED BY MODEL>
+
+Our fourth and final model (nicknamed model B) had a PER of about XX%.
+
+<EXAMPLE OF SENTENCE TRANSLATED BY MODEL OR OTHER PROOF OF CONCEPT FOR THIS IDEA>
 
 ## What we'd do next
 Each person has different neural patterns that affect our prediction of speech, so we want to make it easier to train new models for new people. If we had more time, we would want to tweak/update our system to make it easier to efficiently gather and train data for new individuals.
@@ -36,7 +52,7 @@ As always, our model can definitely be improved. Another possible course of acti
 
 ## Sources
 "An accurate and rapidly calibrating speech neuroprosthesis" by Card et. al (2024)
-    [Full paper on New England Journal of Medicine](https://www.nejm.org/doi/full/10.1056/NEJMoa2314132?referrer=https%3A%2F%2Fgithub.com%2F)
-    [GitHub repository](https://github.com/Neuroprosthetics-Lab/nejm-brain-to-text)
-    [Data available on Dryad](https://datadryad.org/dataset/doi:10.5061/dryad.dncjsxm85)
-    [Kaggle competition](https://www.kaggle.com/competitions/brain-to-text-25/data)
+- [Full paper on New England Journal of Medicine](https://www.nejm.org/doi/full/10.1056/NEJMoa2314132?referrer=https%3A%2F%2Fgithub.com%2F)
+- [GitHub repository](https://github.com/Neuroprosthetics-Lab/nejm-brain-to-text)
+- [Data available on Dryad](https://datadryad.org/dataset/doi:10.5061/dryad.dncjsxm85)
+- [Kaggle competition](https://www.kaggle.com/competitions/brain-to-text-25/data)
