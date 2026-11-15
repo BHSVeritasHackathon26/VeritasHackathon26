@@ -1,5 +1,5 @@
 # Thought-to-Text
-**Track:** AI + Languages
+**Track:** AI + Languages\
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
 ## The problem
@@ -29,19 +29,19 @@ First, we trained a very basic and rudimentary linear model in about 20 minutes 
 ## Results
 Our baseline linear model had a PER (phoneme error rate) of about 61%.
 
-<EXAMPLE OF SENTENCE TRANSLATED BY MODEL>
+EXAMPLE OF SENTENCE TRANSLATED BY MODEL
 
 Our second model (nicknamed model A-short) had a PER of about 10.4%.
 
-<EXAMPLE OF SENTENCE TRANSLATED BY MODEL>
+EXAMPLE OF SENTENCE TRANSLATED BY MODEL
 
 Our third model (nicknamed model A-long) had a PER of about XX%.
 
-<EXAMPLE OF SENTENCE TRANSLATED BY MODEL>
+EXAMPLE OF SENTENCE TRANSLATED BY MODEL
 
 Our fourth and final model (nicknamed model B) had a PER of about XX%.
 
-<EXAMPLE OF SENTENCE TRANSLATED BY MODEL OR OTHER PROOF OF CONCEPT FOR THIS IDEA>
+EXAMPLE OF SENTENCE TRANSLATED BY MODEL OR OTHER PROOF OF CONCEPT FOR THIS IDEA
 
 ## What we'd do next
 Each person has different neural patterns that affect our prediction of speech, so we want to make it easier to train new models for new people. If we had more time, we would want to tweak/update our system to make it easier to efficiently gather and train data for new individuals.
