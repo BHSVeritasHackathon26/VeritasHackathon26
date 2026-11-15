@@ -45,19 +45,28 @@ Anyone with a link can use the app, so stop the server when you are done.
 
 ## 3. Use it
 
-Drag a `.hdf5` file anywhere onto the page. Results appear one trial at a time as
-the model finishes them. Click a row (or use ↑ / ↓) to show it large and hear it.
+The front page is three boxes, top to bottom, one per stage:
 
-- The app is built for the unlabeled test files: it never reads sentence labels
-  and has no accuracy scoring.
-- "Read aloud" uses the browser's built-in voices; pick the voice and speed
-  under the result.
+1. **Input**: drag a `.hdf5` file onto the page (or click the box to browse).
+2. **Phonemes**: the sounds the model decoded, as a row of pills (gaps = word breaks).
+3. **Sentence**: the sentence those sounds turn into, read aloud automatically.
+   The speaker button replays it.
+
+A file holds many sentences. The first one shows right away and the rest keep
+decoding behind it; use the ‹ › buttons (or the arrow keys) in the Input box to
+step through them.
+
+Box 2 shows the `phonemes` that `predict()` returns (a string such as `AY | N OW`, or a
+list; `|` is a word break). If a model returns only a sentence, box 2 says so.
+
+The app is built for the unlabeled test files: it never reads sentence labels and
+has no accuracy scoring.
 
 ## Browsing the held-out sentences
 
 When the repo's `results/run_a_val.json` and the `hdf5_data_final/` data folder are
-present, the top of the page also lets you browse the 1,426 held-out (val)
-sentences: pick a session and sentence, or press **Random sentence**. For each one
+present, the explorer page at `/explorer` (for example http://localhost:8000/explorer) lets you
+browse the 1,426 held-out (val) sentences: pick a session and sentence, or press **Random sentence**. For each one
 it shows the neural recording, what the participant was trying to say, the phonemes
 the model produced, and the sentence from the dictionary decoder and from the
 language-model decoder, with wrong words highlighted and error counts.
