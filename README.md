@@ -4,14 +4,14 @@ This project decodes attempted speech from neural data into text. We reached a 1
 **Team:** Theodore Chen, Aden Hochberg, and Bradyn McLean
 
 ## The problem
-Hundreds of thousands of people lose the ability to speak because of a loss of motor control of the jaw. Communication is essential for quality of life and for daily function, and losing the ability to speak is a life changing scenario that's difficult to navigate.
+According to the NIH, hundreds of thousands of people lose the ability to speak because of a loss of motor control of the jaw. Communication is essential for quality of life and for daily function, and losing the ability to speak is a life changing scenario that's difficult to navigate.
 
 **Who it's for:** an adult with ALS (amyotrophic lateral sclerosis) or another motor dysfunction who can no longer speak clearly, at the moment they want to tell a family member or carer something. The input is neural activity recorded while they *attempt* to speak; the output is the sentence as text or voice.
 
 ## What we built
 People who have *lost* the ability to speak have a strong advantage over those who have been unable to speak their whole lives - their brains still *know* how to speak, even if they can't make the actual noise. 
 
-We built a model to interpret neural signals from someone's brain into intended speech, allowing English-speakers to effectively convert thought to text.
+We built a model to interpret neural signals from someone's brain into intended speech, allowing English-speakers to effectively convert attempted speech to text.
 
 Using BCI (brain computer interfaces), it is possible to receive information about neural firings in specific parts of the brain. This data acts as the input for our model. Our model outputs predicted phonemes, which can then be converted into real English words and sentences.
 > A phoneme is the smallest unit of spoken sound in a language. We are using the 39 phonemes of American English (the language our data is for), plus a silence marker between words and a "blank", for 41 classes in total.
@@ -39,7 +39,7 @@ The model is trained with CTC loss, which lets it learn the phoneme sequence wit
 The full process can be seen in Figure 1.
 
 ### Demo app
-The `app/` folder holds a web demo: drop an HDF5 file of neural recordings onto the page and it shows the decoded phonemes, the dictionary decoder's words, the language-model sentence and the final sentence (read aloud), with the attempted sentence at the top when it is known. The language-model step is not run live (it needs a Gemini key and internet); for held-out val recordings the page shows the saved Gemini 3.1 sentence from `results/run_a_val_gemini31.json`. Run it with `python app/server.py`; see [app/README.md](app/README.md). The earlier version of the app is kept in `app_v2/`.
+The `app_v2/` folder holds a web demo: drop an HDF5 file of neural recordings onto the page and it shows the decoded phonemes, the dictionary decoder's words, the language-model sentence and the final sentence (read aloud), with the attempted sentence at the top when it is known. The language-model step is not run live (it needs a Gemini key and internet); for held-out val recordings the page shows the saved Gemini 3.1 sentence from `results/run_a_val_gemini31.json`. Run it with `python app_v2/server.py`; see [app_v2/README.md](app_v2/README.md). The earlier version of the app is kept in `app/`.
 
 ## Process
 The data from the lab was collected across 45 sessions over the span of two years. We split this data into four parts, `train`, `tune`, `val`, and `test`:
@@ -164,7 +164,7 @@ All the models we trained significantly outperformed our baseline linear model, 
 
 However, there is a point when more training doesn't do that much. Going from 40,000 to 80,000 batches cut tune phoneme error by 2.2 points, but the next 40,000 batches cut it by only 0.6, and in our example sentence the 80k and 120k models differed by only a couple of words. In contrast, increasing the data size (number of training sentences used) *does* still significantly increase the quality of the model, as shown in the results above.
 
-Our model is clearly not perfect. When testing on many different sentences, our 120k batch model with all training sentences still made many mistakes. For example, when the participant was trying to say "the past few wakes are a case in point," the model predicted that the participant said "the house you weeks are a cheese in point."
+Our model is clearly not perfect. When testing on many different sentences, our 120k batch model with all training sentences still made many mistakes. For example, when the participant was trying to say "the past few weeks are a case in point," the model predicted that the participant said "the house you weeks are a cheese in point."
 
 Some other things we learned from the results:
 - **The model does worse on kinds of sentences it never trained on.** Written web text, Harvard sentences and random word lists only appear in val, and they score noticeably worse. This explains part of why val is harder than tune.
@@ -203,8 +203,10 @@ Link to our demo video: [YouTube](https://www.youtube.com/watch?v=6myo24AHVIQ)
 - [Data available on Dryad](https://datadryad.org/dataset/doi:10.5061/dryad.dncjsxm85)
 - [Kaggle competition](https://www.kaggle.com/competitions/brain-to-text-25/data)
 
-[CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) (via the `cmudict` Python package)
-[Google Gemini API](https://aistudio.google.com) (`gemini-3.1-flash-lite` for our headline results; `gemini-3.5-flash-lite` for the baseline and earlier runs) for the language-model decoder
+[CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict) (via the `cmudict` Python package)\
+[Google Gemini API](https://aistudio.google.com) (`gemini-3.1-flash-lite` for our headline results; `gemini-3.5-flash-lite` for the baseline and earlier runs) for the language-model decoder\
+[NIH - "Global Prevalence and Incidence of Amyotrophic Lateral Sclerosis" by Wolfson et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC10424837/) for statistics about ALS
+
 
 Libraries: PyTorch, NumPy, h5py, cmudict, google-genai, matplotlib
 
